@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, PrimaryColumn, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  PrimaryColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class Ngo {
@@ -53,6 +60,6 @@ export class Ngo {
   @CreateDateColumn()
   createAt!: Date;
 
-  @CreateDateColumn()
+  @UpdateDateColumn()
   updatedAt!: Date;
 }
