@@ -5,10 +5,9 @@ import {
 
 @Entity()
 export class Login {
-    @Column({ select: false, length: 20 })
+    @Column({ select: false, length: 30 })
     password: string;
 
     @Column({ type: 'text', length: 200 })
     email: string;
-
 }
