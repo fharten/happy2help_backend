@@ -2,7 +2,6 @@ import cors from 'cors';
 import express from 'express';
 import { config } from 'dotenv';
 import { DataSource } from 'typeorm';
-import { Ngo } from './models/ngoModel';
 
 // Load environment variables
 config();
@@ -14,7 +13,7 @@ const PORT = process.env.PORT || 3333;
 const AppDataSource = new DataSource({
   type: 'better-sqlite3',
   database: process.env.DATABASE_PATH || 'database.sqlite',
-  entities: [Ngo], // Add your entities here
+  entities: [], // Add your entities here
   synchronize: true, // Set to false in production
   logging: false,
 });
