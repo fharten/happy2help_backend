@@ -30,7 +30,7 @@ export class Ngo {
   industry: string[];
 
   @Column({ type: 'text', length: 255 })
-  streetAndNumber!: string;
+  streetAndNumber: string;
 
   @Column()
   zipCode: number;
