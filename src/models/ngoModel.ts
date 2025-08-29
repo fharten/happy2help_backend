@@ -2,7 +2,6 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  PrimaryColumn,
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -10,16 +9,16 @@ import {
 @Entity()
 export class Ngo {
   @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  id: string;
 
   @Column({ type: 'text', length: 200 })
-  name!: string;
+  name: string;
 
   @Column({ type: 'text', length: 255 })
-  image!: string;
+  image: string;
 
   @Column()
-  isNonProfit!: boolean;
+  isNonProfit: boolean;
 
   @Column({
     type: 'text',
@@ -28,22 +27,22 @@ export class Ngo {
       from: (value: string) => JSON.parse(value || '[]'),
     },
   })
-  industry!: string[];
+  industry: string[];
 
   @Column({ type: 'text', length: 255 })
-  streetAndNumber!: string;
+  streetAndNumber: string;
 
   @Column()
-  zipCode!: number;
+  zipCode: number;
 
   @Column({ type: 'text', length: 200 })
-  city!: string;
+  city: string;
 
   @Column({ type: 'text', length: 200 })
-  state!: string;
+  state: string;
 
   @Column({ type: 'text', length: 200 })
-  principal!: string;
+  principal: string;
 
   @Column({ type: 'text', length: 200, nullable: true })
   contactEmail?: string;
@@ -52,14 +51,14 @@ export class Ngo {
   phone?: string;
 
   @Column({ default: false })
-  isActivated!: boolean;
+  isActivated: boolean;
 
   @Column({ default: false })
-  isDisabled!: boolean;
+  isDisabled: boolean;
 
   @CreateDateColumn()
-  createAt!: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  updatedAt!: Date;
+  updatedAt: Date;
 }
