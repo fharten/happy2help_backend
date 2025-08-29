@@ -6,19 +6,27 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+import { UserRole } from '../types/userRole';
+
 @Entity()
-export class Ngo {
+export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ type: 'text', length: 200 })
-  name: string;
+  firstName: string;
+
+  @Column({ type: 'text', length: 200 })
+  lastName: string;
 
   @Column({ type: 'text', length: 255 })
   image: string;
 
-  @Column()
-  isNonProfit: boolean;
+  @Column({ type: 'text', length: 200, nullable: true })
+  contactEmail?: string;
+
+  @Column({ type: 'text', length: 200, nullable: true })
+  phone?: string;
 
   @Column({
     type: 'text',
@@ -27,10 +35,26 @@ export class Ngo {
       from: (value: string) => JSON.parse(value || '[]'),
     },
   })
-  industry: string[];
+  skills: string[];
 
-  @Column({ type: 'text', length: 255 })
-  streetAndNumber!: string;
+  @Column({
+    type: 'enum',
+    enum: UserRole,
+    default: UserRole.USER,
+  })
+  role: UserRole;
+
+  @Column({
+    type: 'text',
+    transformer: {
+      to: (value: string[]) => JSON.stringify(value),
+      from: (value: string) => JSON.parse(value || '[]'),
+    },
+  })
+  ngoMemberships: string[];
+
+  @Column()
+  yearOfBirth: number;
 
   @Column()
   zipCode: number;
@@ -40,15 +64,6 @@ export class Ngo {
 
   @Column({ type: 'text', length: 200 })
   state: string;
-
-  @Column({ type: 'text', length: 200 })
-  principal: string;
-
-  @Column({ type: 'text', length: 200, nullable: true })
-  contactEmail?: string;
-
-  @Column({ type: 'text', length: 200, nullable: true })
-  phone?: string;
 
   @Column({ default: false })
   isActivated: boolean;
