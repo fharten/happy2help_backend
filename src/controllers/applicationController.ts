@@ -75,7 +75,7 @@ export class ApplicationController {
   getApplicationById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const application = await this.applicationRepository.find({
+      const application = await this.applicationRepository.findOne({
         where: { id },
       });
 
@@ -83,7 +83,6 @@ export class ApplicationController {
         success: true,
         message: 'Application retrieved successfully',
         data: application,
-        count: application.length,
       });
     } catch (error) {
       console.error('Error fetching application:', error);
@@ -99,6 +98,21 @@ export class ApplicationController {
   createApplicationByProjectId = async (req: Request, res: Response): Promise<void> => {
     try {
       const applicationData = req.body;
+
+      if (
+        !applicationData.projectId ||
+        !applicationData.userId ||
+        !applicationData.ngoId ||
+        !applicationData.status
+      ) {
+        res.status(400).json({
+          success: false,
+          message:
+            'Required fields missing: firstName, lastName, yearOfBirth, zipCode, city, state',
+        });
+        return;
+      }
+
       const application = this.applicationRepository.create(applicationData);
       const savedApplication = await this.applicationRepository.save(application);
 
@@ -122,6 +136,16 @@ export class ApplicationController {
     try {
       const { id } = req.params;
       const applicationUpdate = req.body;
+
+      if (!applicationUpdate.projectId || !applicationUpdate.status) {
+        res.status(400).json({
+          success: false,
+          message:
+            'Required fields missing: firstName, lastName, yearOfBirth, zipCode, city, state',
+        });
+        return;
+      }
+
       const existingApplication = await this.applicationRepository.findOne({ where: { id } });
 
       if (!existingApplication) {
@@ -167,7 +191,7 @@ export class ApplicationController {
 
       await this.applicationRepository.delete(id);
 
-      res.status(204);
+      res.status(204).send();
     } catch (error) {
       console.error('Error deleting application:', error);
       res.status(500).json({
