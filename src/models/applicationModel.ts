@@ -1,31 +1,29 @@
-import {
-    Column,
-    Entity,
-    PrimaryGeneratedColumn
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 export enum ApplicationStatus {
-    PENDING = "pending",
-    ACCEPTED = "accepted",
-    REJECTED = "rejected",
+  PENDING = 'pending',
+  ACCEPTED = 'accepted',
+  REJECTED = 'rejected',
 }
-
 
 @Entity()
 export class Application {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-    @Column('uuid')
-    projectId: string;
+  @Column('uuid')
+  projectId: string;
 
-    @Column('uuid')
-    userId: string;
+  @Column('uuid')
+  userId: string;
 
-    @Column({ 
-        type: 'enum', 
-        enum: ApplicationStatus, 
-        default: ApplicationStatus.PENDING,
-    })
-    status: string;
+  @Column('uuid')
+  ngoId: string;
+
+  @Column({
+    type: 'enum',
+    enum: ApplicationStatus,
+    default: ApplicationStatus.PENDING,
+  })
+  status: string;
 }
