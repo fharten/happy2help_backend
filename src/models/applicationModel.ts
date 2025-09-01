@@ -1,10 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-
-export enum ApplicationStatus {
-  PENDING = 'pending',
-  ACCEPTED = 'accepted',
-  REJECTED = 'rejected',
-}
+import { ApplicationStatus } from '../types/applicationRole';
 
 @Entity()
 export class Application {
@@ -21,9 +16,9 @@ export class Application {
   ngoId: string;
 
   @Column({
-    type: 'enum',
+    type: 'simple-enum',
     enum: ApplicationStatus,
     default: ApplicationStatus.PENDING,
   })
-  status: string;
+  status: ApplicationStatus;
 }

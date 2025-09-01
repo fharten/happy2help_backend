@@ -25,6 +25,12 @@ export class User {
   @Column({ type: 'text', length: 200, nullable: true })
   contactEmail?: string;
 
+  @Column({ type: 'text', length: 200 })
+  loginEmail: string;
+
+  @Column({ select: false, length: 30 })
+  password: string;
+
   @Column({ type: 'text', length: 200, nullable: true })
   phone?: string;
 
@@ -38,7 +44,7 @@ export class User {
   skills: string[];
 
   @Column({
-    type: 'enum',
+    type: 'simple-enum',
     enum: UserRole,
     default: UserRole.USER,
   })

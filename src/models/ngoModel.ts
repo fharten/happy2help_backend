@@ -47,6 +47,12 @@ export class Ngo {
   @Column({ type: 'text', length: 200, nullable: true })
   contactEmail?: string;
 
+  @Column({ type: 'text', length: 200 })
+  loginEmail: string;
+
+  @Column({ select: false, length: 30 })
+  password: string;
+
   @Column({ type: 'text', length: 200, nullable: true })
   phone?: string;
 
