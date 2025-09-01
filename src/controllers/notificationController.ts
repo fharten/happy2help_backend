@@ -78,6 +78,20 @@ export class NotificationController {
   createNotification = async (req: Request, res: Response): Promise<void> => {
     try {
       const notificationData = req.body;
+
+      if (
+        !notificationData.name ||
+        !notificationData.userId ||
+        !notificationData.ngoId ||
+        !notificationData.description
+      ) {
+        res.status(400).json({
+          success: false,
+          message: 'Required fields missing: name, userId, ngoId, description',
+        });
+        return;
+      }
+
       const notification = this.notificationRepository.create(notificationData);
       const savedNotification = await this.notificationRepository.save(notification);
 
