@@ -9,7 +9,7 @@ export class NotificationController {
   getAllUserNotificationsByUserId = async (req: Request, res: Response): Promise<void> => {
     try {
       const { userId } = req.params;
-      const notifications = await this.notificationRepository.find({
+      const notifications = await this.notificationRepository.findOne({
         where: { userId },
       });
 
@@ -32,7 +32,7 @@ export class NotificationController {
   getAllNgoNotificationsByNgoId = async (req: Request, res: Response): Promise<void> => {
     try {
       const { ngoId } = req.params;
-      const notifications = await this.notificationRepository.find({
+      const notifications = await this.notificationRepository.findOne({
         where: { ngoId },
       });
 
@@ -55,7 +55,7 @@ export class NotificationController {
   getNotificationById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const notification = await this.notificationRepository.find({
+      const notification = await this.notificationRepository.findOne({
         where: { id },
       });
 
