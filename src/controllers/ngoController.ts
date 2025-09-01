@@ -74,7 +74,7 @@ export class NgoController {
     }
   };
 
-  // CREATE SINGLE NGO | POST /api/ngos
+  // CREATE NGO | POST /api/ngos
   createNgo = async (req: Request, res: Response): Promise<void> => {
     try {
       const ngoData = req.body;
@@ -87,16 +87,16 @@ export class NgoController {
         data: savedNgo,
       });
     } catch (error) {
-      console.error('Error creating NGOs:', error);
+      console.error('Error creating NGO:', error);
       res.status(500).json({
         success: false,
-        message: 'Failed to create NGOs',
+        message: 'Failed to create NGO',
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   };
 
-  // UPDATE single NGO | PUT /api/ngos/:id
+  // UPDATE SINGLE NGO | PUT /api/ngos/:id
   updateNgoById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
