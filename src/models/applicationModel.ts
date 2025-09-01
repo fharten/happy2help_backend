@@ -16,7 +16,7 @@ export class Application {
   ngoId: string;
 
   @Column({
-    type: 'simple-enum',
+    type: 'varchar',
     enum: ApplicationStatus,
     default: ApplicationStatus.PENDING,
   })

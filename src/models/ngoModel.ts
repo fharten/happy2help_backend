@@ -11,13 +11,13 @@ export class Ngo {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'text', length: 200 })
-  name: string;
+  @Column({ type: 'text', length: 200, nullable: true })
+  name?: string;
 
-  @Column({ type: 'text', length: 255 })
-  image: string;
+  @Column({ type: 'text', length: 255, nullable: true })
+  image?: string;
 
-  @Column()
+  @Column({ default: false })
   isNonProfit: boolean;
 
   @Column({
@@ -26,20 +26,21 @@ export class Ngo {
       to: (value: string[]) => JSON.stringify(value),
       from: (value: string) => JSON.parse(value || '[]'),
     },
+    nullable: true,
   })
-  industry: string[];
+  industry?: string[];
 
-  @Column({ type: 'text', length: 255 })
-  streetAndNumber: string;
+  @Column({ type: 'text', length: 255, nullable: true })
+  streetAndNumber?: string;
 
-  @Column()
-  zipCode: number;
+  @Column({ nullable: true })
+  zipCode?: number;
 
-  @Column({ type: 'text', length: 200 })
-  city: string;
+  @Column({ type: 'text', length: 200, nullable: true })
+  city?: string;
 
-  @Column({ type: 'text', length: 200 })
-  state: string;
+  @Column({ type: 'text', length: 200, nullable: true })
+  state?: string;
 
   @Column({ type: 'text', length: 200 })
   principal: string;

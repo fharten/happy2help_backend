@@ -29,17 +29,6 @@ export class UserController {
   // CREATE SINGLE USER | POST /api/users
   createUser = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { firstName, lastName, yearOfBirth, zipCode, city, state } = req.body;
-
-      if (!firstName || !lastName || !yearOfBirth || !zipCode || !city || !state) {
-        res.status(400).json({
-          success: false,
-          message:
-            'Required fields missing: firstName, lastName, yearOfBirth, zipCode, city, state',
-        });
-        return;
-      }
-
       const userData = req.body;
       const user = this.userRepository.create(userData);
       const savedUser = await this.userRepository.save(user);

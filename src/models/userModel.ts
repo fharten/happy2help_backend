@@ -13,19 +13,19 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'text', length: 200 })
-  firstName: string;
+  @Column({ type: 'text', length: 200, nullable: true })
+  firstName?: string;
 
-  @Column({ type: 'text', length: 200 })
-  lastName: string;
+  @Column({ type: 'text', length: 200, nullable: true })
+  lastName?: string;
 
-  @Column({ type: 'text', length: 255 })
-  image: string;
+  @Column({ type: 'text', length: 255, nullable: true })
+  image?: string;
 
   @Column({ type: 'text', length: 200, nullable: true })
   contactEmail?: string;
 
-  @Column({ type: 'text', length: 200 })
+  @Column({ type: 'text', length: 200, unique: true })
   loginEmail: string;
 
   @Column({ select: false, length: 30 })
@@ -40,11 +40,12 @@ export class User {
       to: (value: string[]) => JSON.stringify(value),
       from: (value: string) => JSON.parse(value || '[]'),
     },
+    nullable: true,
   })
-  skills: string[];
+  skills?: string[];
 
   @Column({
-    type: 'simple-enum',
+    type: 'varchar',
     enum: UserRole,
     default: UserRole.USER,
   })
@@ -56,20 +57,21 @@ export class User {
       to: (value: string[]) => JSON.stringify(value),
       from: (value: string) => JSON.parse(value || '[]'),
     },
+    nullable: true,
   })
-  ngoMemberships: string[];
+  ngoMemberships?: string[];
 
-  @Column()
-  yearOfBirth: number;
+  @Column({ nullable: true })
+  yearOfBirth?: number;
 
-  @Column()
-  zipCode: number;
+  @Column({ nullable: true })
+  zipCode?: number;
 
-  @Column({ type: 'text', length: 200 })
-  city: string;
+  @Column({ type: 'text', length: 200, nullable: true })
+  city?: string;
 
-  @Column({ type: 'text', length: 200 })
-  state: string;
+  @Column({ type: 'text', length: 200, nullable: true })
+  state?: string;
 
   @Column({ default: false })
   isActivated: boolean;
