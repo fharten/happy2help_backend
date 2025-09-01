@@ -11,7 +11,7 @@ export class AuthController {
   private userRepository = AppDataSource.getRepository(User);
   private ngoRepository = AppDataSource.getRepository(Ngo);
 
-  // POST /api/auth/user/register
+  // CREATE USER LOGIN | POST /api/auth/user/register
   registerUser = async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body;
@@ -67,7 +67,6 @@ export class AuthController {
       res.status(201).json({
         success: true,
         message: 'User registered successfully',
-        data: user,
       });
     } catch (error) {
       console.error('Error creating user:', error);
@@ -79,7 +78,7 @@ export class AuthController {
     }
   };
 
-  // POST /api/auth/ngo/register
+  // CREATE NGO LOGIN | POST /api/auth/ngo/register
   registerNgo = async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body;
@@ -135,7 +134,6 @@ export class AuthController {
       res.status(201).json({
         success: true,
         message: 'Ngo registered successfully',
-        data: ngo,
       });
     } catch (error) {
       console.error('Error creating ngo:', error);
@@ -147,7 +145,7 @@ export class AuthController {
     }
   };
 
-  // POST /api/auth/user/login
+  // LOGIN USER | POST /api/auth/user/login
   loginUser = async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body;
@@ -179,6 +177,7 @@ export class AuthController {
           success: false,
           message: 'Invalid email or password',
         });
+        return;
       }
 
       res.status(200).json({
@@ -196,7 +195,7 @@ export class AuthController {
     }
   };
 
-  // POST /api/auth/ngo/login
+  // LOGIN NGO | POST /api/auth/ngo/login
   loginNgo = async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body;
@@ -228,6 +227,7 @@ export class AuthController {
           success: false,
           message: 'Invalid email or password',
         });
+        return;
       }
 
       res.status(200).json({
