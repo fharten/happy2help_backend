@@ -3,13 +3,12 @@ import { AppDataSource } from '../app';
 import { Notification } from '../models/notificationModel';
 
 export class NotificationController {
-  private notificationRepository = AppDataSource.getRepository(Notification);
-
   // GET ALL BY USER ID | GET /api/notifications/user/:userId
   getAllUserNotificationsByUserId = async (req: Request, res: Response): Promise<void> => {
     try {
+      const notificationRepository = AppDataSource.getRepository(Notification);
       const { userId } = req.params;
-      const notifications = await this.notificationRepository.find({
+      const notifications = await notificationRepository.find({
         where: { userId },
       });
 
@@ -31,8 +30,9 @@ export class NotificationController {
   // GET ALL BY NGO ID | GET /api/notifications/ngo/:ngoId
   getAllNgoNotificationsByNgoId = async (req: Request, res: Response): Promise<void> => {
     try {
+      const notificationRepository = AppDataSource.getRepository(Notification);
       const { ngoId } = req.params;
-      const notifications = await this.notificationRepository.find({
+      const notifications = await notificationRepository.find({
         where: { ngoId },
       });
 
@@ -54,8 +54,9 @@ export class NotificationController {
   // GET SINGLE NOTIFICATION | GET /api/notifications/:id
   getNotificationById = async (req: Request, res: Response): Promise<void> => {
     try {
+      const notificationRepository = AppDataSource.getRepository(Notification);
       const { id } = req.params;
-      const notification = await this.notificationRepository.findOne({
+      const notification = await notificationRepository.findOne({
         where: { id },
       });
 
@@ -77,6 +78,7 @@ export class NotificationController {
   // CREATE SINGLE NOTIFICATION | POST /api/notifications
   createNotification = async (req: Request, res: Response): Promise<void> => {
     try {
+      const notificationRepository = AppDataSource.getRepository(Notification);
       const notificationData = req.body;
 
       if (
@@ -92,8 +94,8 @@ export class NotificationController {
         return;
       }
 
-      const notification = this.notificationRepository.create(notificationData);
-      const savedNotification = await this.notificationRepository.save(notification);
+      const notification = notificationRepository.create(notificationData);
+      const savedNotification = await notificationRepository.save(notification);
 
       res.status(201).json({
         success: true,
@@ -113,9 +115,10 @@ export class NotificationController {
   // UPDATE SINGLE NOTIFICATION | PUT /api/notifications/:id
   updateNotificationById = async (req: Request, res: Response): Promise<void> => {
     try {
+      const notificationRepository = AppDataSource.getRepository(Notification);
       const { id } = req.params;
       const notificationUpdate = req.body;
-      const existingNotification = await this.notificationRepository.findOne({ where: { id } });
+      const existingNotification = await notificationRepository.findOne({ where: { id } });
 
       if (!existingNotification) {
         res.status(404).json({
@@ -125,9 +128,9 @@ export class NotificationController {
         return;
       }
 
-      await this.notificationRepository.update(id, notificationUpdate);
+      await notificationRepository.update(id, notificationUpdate);
 
-      const updatedNotification = await this.notificationRepository.findOne({ where: { id } });
+      const updatedNotification = await notificationRepository.findOne({ where: { id } });
 
       res.status(200).json({
         success: true,

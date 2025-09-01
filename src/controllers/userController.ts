@@ -3,12 +3,11 @@ import { AppDataSource } from '../app';
 import { User } from '../models/userModel';
 
 export class UserController {
-  private userRepository = AppDataSource.getRepository(User);
-
   // GET ALL USERS | GET /api/users
   getAllUsers = async (req: Request, res: Response): Promise<void> => {
     try {
-      const users = await this.userRepository.find();
+      const userRepository = AppDataSource.getRepository(User);
+      const users = await userRepository.find();
 
       res.status(200).json({
         success: true,
@@ -29,9 +28,10 @@ export class UserController {
   // CREATE SINGLE USER | POST /api/users
   createUser = async (req: Request, res: Response): Promise<void> => {
     try {
+      const userRepository = AppDataSource.getRepository(User);
       const userData = req.body;
-      const user = this.userRepository.create(userData);
-      const savedUser = await this.userRepository.save(user);
+      const user = userRepository.create(userData);
+      const savedUser = await userRepository.save(user);
 
       res.status(201).json({
         success: true,
@@ -51,8 +51,9 @@ export class UserController {
   // GET SINGLE USER | GET /api/users/:id
   getUserById = async (req: Request, res: Response): Promise<void> => {
     try {
+      const userRepository = AppDataSource.getRepository(User);
       const { id } = req.params;
-      const user = await this.userRepository.findOne({
+      const user = await userRepository.findOne({
         where: { id },
       });
 
@@ -82,9 +83,10 @@ export class UserController {
   // UPDATE SINGLE USER | PUT /api/users/:id
   updateUserById = async (req: Request, res: Response): Promise<void> => {
     try {
+      const userRepository = AppDataSource.getRepository(User);
       const { id } = req.params;
       const userUpdate = req.body;
-      const existingUser = await this.userRepository.findOne({ where: { id } });
+      const existingUser = await userRepository.findOne({ where: { id } });
 
       if (!existingUser) {
         res.status(404).json({
@@ -94,8 +96,8 @@ export class UserController {
         return;
       }
 
-      await this.userRepository.update(id, userUpdate);
-      const updatedUser = await this.userRepository.findOne({ where: { id } });
+      await userRepository.update(id, userUpdate);
+      const updatedUser = await userRepository.findOne({ where: { id } });
 
       res.status(200).json({
         success: true,
@@ -115,8 +117,9 @@ export class UserController {
   // DELETE SINGLE USER | DELETE /api/users/:id
   deleteUserById = async (req: Request, res: Response): Promise<void> => {
     try {
+      const userRepository = AppDataSource.getRepository(User);
       const { id } = req.params;
-      const existingUser = await this.userRepository.findOne({ where: { id } });
+      const existingUser = await userRepository.findOne({ where: { id } });
 
       if (!existingUser) {
         res.status(404).json({
@@ -126,7 +129,7 @@ export class UserController {
         return;
       }
 
-      await this.userRepository.delete(id);
+      await userRepository.delete(id);
       res.status(204).send();
     } catch (error) {
       console.error('Error deleting user:', error);

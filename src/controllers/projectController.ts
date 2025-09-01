@@ -3,12 +3,11 @@ import { AppDataSource } from '../app';
 import { Project } from '../models/projectModel';
 
 export class ProjectController {
-  private projectRepository = AppDataSource.getRepository(Project);
-
   // GET ALL | GET /api/projects
   getAllProjects = async (req: Request, res: Response): Promise<void> => {
     try {
-      const projects = await this.projectRepository.find();
+      const projectRepository = AppDataSource.getRepository(Project);
+      const projects = await projectRepository.find();
 
       res.status(200).json({
         success: true,
@@ -29,8 +28,9 @@ export class ProjectController {
   // GET SINGLE PROJECT | GET /api/projects/:id
   getProjectById = async (req: Request, res: Response): Promise<void> => {
     try {
+      const projectRepository = AppDataSource.getRepository(Project);
       const { id } = req.params;
-      const projects = await this.projectRepository.find({
+      const projects = await projectRepository.find({
         where: { id },
       });
 
@@ -53,6 +53,7 @@ export class ProjectController {
   // CREATE PROJECT | POST /api/projects
   createProject = async (req: Request, res: Response): Promise<void> => {
     try {
+      const projectRepository = AppDataSource.getRepository(Project);
       const projectData = req.body;
 
       if (
@@ -76,8 +77,8 @@ export class ProjectController {
         return;
       }
 
-      const project = this.projectRepository.create(projectData);
-      const savedNgo = await this.projectRepository.save(project);
+      const project = projectRepository.create(projectData);
+      const savedNgo = await projectRepository.save(project);
 
       res.status(201).json({
         success: true,
@@ -97,6 +98,7 @@ export class ProjectController {
   // UPDATE SINGLE PROJECT | PUT /api/projects/:id
   updateProjectById = async (req: Request, res: Response): Promise<void> => {
     try {
+      const projectRepository = AppDataSource.getRepository(Project);
       const { id } = req.params;
       const projectUpdate = req.body;
 
@@ -121,7 +123,7 @@ export class ProjectController {
         return;
       }
 
-      const existingProject = await this.projectRepository.findOne({ where: { id } });
+      const existingProject = await projectRepository.findOne({ where: { id } });
 
       if (!existingProject) {
         res.status(404).json({
@@ -131,9 +133,9 @@ export class ProjectController {
         return;
       }
 
-      await this.projectRepository.update(id, projectUpdate);
+      await projectRepository.update(id, projectUpdate);
 
-      const updatedProject = await this.projectRepository.findOne({ where: { id } });
+      const updatedProject = await projectRepository.findOne({ where: { id } });
 
       res.status(200).json({
         success: true,
@@ -153,8 +155,9 @@ export class ProjectController {
   // DELETE SINGLE PROJECT | DELETE /api/projects/:id
   deleteProjectById = async (req: Request, res: Response): Promise<void> => {
     try {
+      const projectRepository = AppDataSource.getRepository(Project);
       const { id } = req.params;
-      const existingProject = await this.projectRepository.findOne({ where: { id } });
+      const existingProject = await projectRepository.findOne({ where: { id } });
 
       if (!existingProject) {
         res.status(404).json({
@@ -164,10 +167,9 @@ export class ProjectController {
         return;
       }
 
-      await this.projectRepository.delete(id);
+      await projectRepository.delete(id);
 
       res.status(204).send();
-
     } catch (error) {
       console.error('Error deleting Project:', error);
       res.status(500).json({

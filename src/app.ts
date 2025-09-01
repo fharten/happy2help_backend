@@ -9,6 +9,7 @@ import { Project } from './models/projectModel';
 import { Skill } from './models/skillModel';
 import { User } from './models/userModel';
 import { Notification } from './models/notificationModel';
+import ngoRoutes from './routes/ngoRoutes';
 
 // Load environment variables
 config();
@@ -41,6 +42,7 @@ const startServer = async () => {
     await AppDataSource.initialize();
     console.log('Database connected successfully');
 
+    app.use('/api/ngos', ngoRoutes);
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });

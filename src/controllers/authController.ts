@@ -8,12 +8,10 @@ import * as bcrypt from 'bcrypt';
 config();
 
 export class AuthController {
-  private userRepository = AppDataSource.getRepository(User);
-  private ngoRepository = AppDataSource.getRepository(Ngo);
-
   // CREATE USER LOGIN | POST /api/auth/user/register
   registerUser = async (req: Request, res: Response) => {
     try {
+      const userRepository = AppDataSource.getRepository(User);
       const { email, password } = req.body;
 
       if (!email || !password) {
@@ -42,7 +40,7 @@ export class AuthController {
         return;
       }
 
-      const existingUser = await this.userRepository.findOne({
+      const existingUser = await userRepository.findOne({
         where: { loginEmail: email.toLowerCase() },
       });
 
@@ -57,12 +55,12 @@ export class AuthController {
       const saltRounds = process.env.SALT_ROUNDS ? parseInt(process.env.SALT_ROUNDS, 10) : 10;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-      const user = this.userRepository.create({
+      const user = userRepository.create({
         loginEmail: email.toLowerCase(),
         password: hashedPassword,
       });
 
-      await this.userRepository.save(user);
+      await userRepository.save(user);
 
       res.status(201).json({
         success: true,
@@ -81,6 +79,7 @@ export class AuthController {
   // CREATE NGO LOGIN | POST /api/auth/ngo/register
   registerNgo = async (req: Request, res: Response) => {
     try {
+      const ngoRepository = AppDataSource.getRepository(Ngo);
       const { email, password } = req.body;
 
       if (!email || !password) {
@@ -109,7 +108,7 @@ export class AuthController {
         return;
       }
 
-      const existingNgo = await this.ngoRepository.findOne({
+      const existingNgo = await ngoRepository.findOne({
         where: { loginEmail: email.toLowerCase() },
       });
 
@@ -124,12 +123,12 @@ export class AuthController {
       const saltRounds = process.env.SALT_ROUNDS ? parseInt(process.env.SALT_ROUNDS, 10) : 10;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-      const ngo = this.ngoRepository.create({
+      const ngo = ngoRepository.create({
         loginEmail: email.toLowerCase(),
         password: hashedPassword,
       });
 
-      await this.ngoRepository.save(ngo);
+      await ngoRepository.save(ngo);
 
       res.status(201).json({
         success: true,
@@ -148,6 +147,7 @@ export class AuthController {
   // LOGIN USER | POST /api/auth/user/login
   loginUser = async (req: Request, res: Response) => {
     try {
+      const userRepository = AppDataSource.getRepository(User);
       const { email, password } = req.body;
 
       if (!email || !password) {
@@ -158,7 +158,7 @@ export class AuthController {
         return;
       }
 
-      const existingUser = await this.userRepository.findOne({
+      const existingUser = await userRepository.findOne({
         where: { loginEmail: email.toLowerCase() },
       });
 
@@ -198,6 +198,7 @@ export class AuthController {
   // LOGIN NGO | POST /api/auth/ngo/login
   loginNgo = async (req: Request, res: Response) => {
     try {
+      const ngoRepository = AppDataSource.getRepository(Ngo);
       const { email, password } = req.body;
 
       if (!email || !password) {
@@ -208,7 +209,7 @@ export class AuthController {
         return;
       }
 
-      const existingNgo = await this.ngoRepository.findOne({
+      const existingNgo = await ngoRepository.findOne({
         where: { loginEmail: email.toLowerCase() },
       });
 
