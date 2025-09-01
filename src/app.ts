@@ -5,10 +5,10 @@ import { DataSource } from 'typeorm';
 import { Ngo } from './models/ngoModel';
 import { Application } from './models/applicationModel';
 import { Category } from './models/categoryModel';
-import { Login } from './models/loginModel';
 import { Project } from './models/projectModel';
 import { Skill } from './models/skillModel';
 import { User } from './models/userModel';
+import { Notification } from './models/notificationModel';
 
 // Load environment variables
 config();
@@ -20,7 +20,7 @@ const PORT = process.env.PORT || 3333;
 const AppDataSource = new DataSource({
   type: 'better-sqlite3',
   database: process.env.DATABASE_PATH || 'database.sqlite',
-  entities: [Application, Category, Login, Ngo, Notification, Project, Skill, User], // Add your entities here
+  entities: [Application, Category, Ngo, Notification, Project, Skill, User], // Add your entities here
   synchronize: true, // Set to false in production
   logging: false,
 });

@@ -11,7 +11,7 @@ export class Skill {
   @Column({ type: 'text', length: 200 })
   description: string;
 
-  @ManyToMany(() => Project, project => project.skills, { eager: true })
+  @ManyToMany(() => Project, project => project.skills)
   @JoinTable({
     name: 'skill_projects', // Junction table name
     joinColumn: { name: 'skill_id', referencedColumnName: 'id' },
