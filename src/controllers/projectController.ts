@@ -71,7 +71,7 @@ export class ProjectController {
         res.status(400).json({
           success: false,
           message:
-            'Nam, description, images, categories, city, zip code, state, principal, skills, startingAt and endingAt are required fields',
+            'Name, description, images, categories, city, zip code, state, principal, skills, startingAt and endingAt are required fields',
         });
         return;
       }
@@ -116,7 +116,7 @@ export class ProjectController {
         res.status(400).json({
           success: false,
           message:
-            'Nam, description, images, categories, city, zip code, state, principal, skills, startingAt and endingAt are required fields',
+            'Name, description, images, categories, city, zip code, state, principal, skills, startingAt and endingAt are required fields',
         });
         return;
       }
