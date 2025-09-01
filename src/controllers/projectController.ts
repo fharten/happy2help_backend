@@ -167,6 +167,7 @@ export class ProjectController {
       await this.projectRepository.delete(id);
 
       res.status(204).send();
+
     } catch (error) {
       console.error('Error deleting Project:', error);
       res.status(500).json({
