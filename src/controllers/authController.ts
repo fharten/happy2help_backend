@@ -170,6 +170,15 @@ export class AuthController {
         return;
       }
 
+      if (!existingUser.password) {
+        console.error('User password is null/undefined for user:', existingUser.loginEmail);
+        res.status(500).json({
+          success: false,
+          message: 'User account corrupted - no password found',
+        });
+        return;
+      }
+
       const isValidPassword = await bcrypt.compare(password, existingUser.password);
 
       if (!isValidPassword) {
