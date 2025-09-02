@@ -30,7 +30,7 @@ export class ProjectController {
   getProjectById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const projects = await this.projectRepository.find({
+      const projects = await this.projectRepository.findOne({
         where: { id },
       });
 
@@ -38,7 +38,6 @@ export class ProjectController {
         success: true,
         message: 'Project retrieved successfully',
         data: projects,
-        count: projects.length,
       });
     } catch (error) {
       console.error('Error fetching Project:', error);

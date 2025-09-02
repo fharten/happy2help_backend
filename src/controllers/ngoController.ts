@@ -54,7 +54,7 @@ export class NgoController {
   getNgoById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const ngos = await this.ngoRepository.find({
+      const ngos = await this.ngoRepository.findOne({
         where: { id },
       });
 
@@ -62,7 +62,6 @@ export class NgoController {
         success: true,
         message: 'NGO retrieved successfully',
         data: ngos,
-        count: ngos.length,
       });
     } catch (error) {
       console.error('Error fetching NGO:', error);
