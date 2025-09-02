@@ -8,18 +8,18 @@ const ngoController = new NgoController();
 router.get('/', ngoController.getAllNgos);
 
 // // GET SINGLE NGO | /ngos/:id
-// router.get('/:id', ngoController.getNgoById);
+router.get('/:id', ngoController.getNgoById);
 
 // // GET all ACTIVATED NGOs | /ngos/activated
-// router.get('/activated', ngoController.getAllActiveNgos);
+router.get('/activated', ngoController.getAllActiveNgos);
 
 // // CREATE NGO | /ngos
-// router.post('/', ngoController.createNgo);
+router.post('/', ngoController.createNgo);
 
 // // UPDATE SINGLE NGO | /ngos/:id
-// router.put('/:id', ngoController.updateNgoById);
+router.put('/:id', ngoController.updateNgoById);
 
 // // DELETE SINGLE NGO | /ngos/:id
-// router.delete('/:id', ngoController.deleteNgoById);
+router.delete('/:id', ngoController.deleteNgoById);
 
 export default router;

@@ -3,11 +3,12 @@ import { AppDataSource } from '../app';
 import { Skill } from '../models/skillModel';
 
 export class SkillController {
+  public skillRepository = AppDataSource.getRepository(Skill);
+
   // GET ALL | GET /api/skills
   getAllSkills = async (req: Request, res: Response): Promise<void> => {
     try {
-      const skillRepository = AppDataSource.getRepository(Skill);
-      const skills = await skillRepository.find();
+      const skills = await this.skillRepository.find();
 
       res.status(200).json({
         success: true,

@@ -3,13 +3,13 @@ import { AppDataSource } from '../app';
 import { Application } from '../models/applicationModel';
 
 export class ApplicationController {
+  public applicationRepository = AppDataSource.getRepository(Application);
+
   // GET ALL BY USER ID | GET /api/applications/user/:userId
   getAllApplicationsByUserId = async (req: Request, res: Response): Promise<void> => {
     const { userId } = req.params;
     try {
-      const applicationRepository = AppDataSource.getRepository(Application);
-
-      const applications = await applicationRepository.find({ where: { userId } });
+      const applications = await this.applicationRepository.find({ where: { userId } });
 
       res.status(200).json({
         success: true,
@@ -31,8 +31,7 @@ export class ApplicationController {
   getAllApplicationsByNgoId = async (req: Request, res: Response): Promise<void> => {
     const { ngoId } = req.params;
     try {
-      const applicationRepository = AppDataSource.getRepository(Application);
-      const applications = await applicationRepository.find({ where: { ngoId } });
+      const applications = await this.applicationRepository.find({ where: { ngoId } });
 
       res.status(200).json({
         success: true,
@@ -54,8 +53,7 @@ export class ApplicationController {
   getAllApplicationsByProjectId = async (req: Request, res: Response): Promise<void> => {
     try {
       const { projectId } = req.params;
-      const applicationRepository = AppDataSource.getRepository(Application);
-      const applications = await applicationRepository.find({ where: { projectId } });
+      const applications = await this.applicationRepository.find({ where: { projectId } });
 
       res.status(200).json({
         success: true,
@@ -76,9 +74,8 @@ export class ApplicationController {
   // GET SINGLE APPLICATION | GET /api/applications/:id
   getApplicationById = async (req: Request, res: Response): Promise<void> => {
     try {
-      const applicationRepository = AppDataSource.getRepository(Application);
       const { id } = req.params;
-      const application = await applicationRepository.findOne({
+      const application = await this.applicationRepository.findOne({
         where: { id },
       });
 
@@ -100,7 +97,6 @@ export class ApplicationController {
   // CREATE APPLICATION | POST /api/applications
   createApplicationByProjectId = async (req: Request, res: Response): Promise<void> => {
     try {
-      const applicationRepository = AppDataSource.getRepository(Application);
       const applicationData = req.body;
 
       if (
@@ -117,8 +113,8 @@ export class ApplicationController {
         return;
       }
 
-      const application = applicationRepository.create(applicationData);
-      const savedApplication = await applicationRepository.save(application);
+      const application = this.applicationRepository.create(applicationData);
+      const savedApplication = await this.applicationRepository.save(application);
 
       res.status(201).json({
         success: true,
@@ -138,7 +134,6 @@ export class ApplicationController {
   // UPDATE SINGLE APPLICATION | PUT /api/applications/:id
   updateApplicationById = async (req: Request, res: Response): Promise<void> => {
     try {
-      const applicationRepository = AppDataSource.getRepository(Application);
       const { id } = req.params;
       const applicationUpdate = req.body;
 
@@ -151,7 +146,7 @@ export class ApplicationController {
         return;
       }
 
-      const existingApplication = await applicationRepository.findOne({ where: { id } });
+      const existingApplication = await this.applicationRepository.findOne({ where: { id } });
 
       if (!existingApplication) {
         res.status(404).json({
@@ -161,9 +156,9 @@ export class ApplicationController {
         return;
       }
 
-      await applicationRepository.update(id, applicationUpdate);
+      await this.applicationRepository.update(id, applicationUpdate);
 
-      const updatedApplication = await applicationRepository.findOne({ where: { id } });
+      const updatedApplication = await this.applicationRepository.findOne({ where: { id } });
 
       res.status(200).json({
         success: true,
@@ -183,9 +178,8 @@ export class ApplicationController {
   // DELETE SINGLE APPLICATION | DELETE /api/applications/:id
   deleteApplicationById = async (req: Request, res: Response): Promise<void> => {
     try {
-      const applicationRepository = AppDataSource.getRepository(Application);
       const { id } = req.params;
-      const existingApplication = await applicationRepository.findOne({ where: { id } });
+      const existingApplication = await this.applicationRepository.findOne({ where: { id } });
 
       if (!existingApplication) {
         res.status(404).json({
@@ -195,7 +189,7 @@ export class ApplicationController {
         return;
       }
 
-      await applicationRepository.delete(id);
+      await this.applicationRepository.delete(id);
 
       res.status(204).send();
     } catch (error) {

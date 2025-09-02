@@ -9,7 +9,7 @@ import { Project } from './models/projectModel';
 import { Skill } from './models/skillModel';
 import { User } from './models/userModel';
 import { Notification } from './models/notificationModel';
-import ngoRoutes from './routes/ngoRoutes';
+// import ngoRoutes from './routes/ngoRoutes';
 
 // Load environment variables
 config();
@@ -38,9 +38,12 @@ app.get('/', (req, res) => {
 
 // Initialize database and start server
 const startServer = async () => {
+  AppDataSource.initialize();
   try {
     await AppDataSource.initialize();
     console.log('Database connected successfully');
+
+    const ngoRoutes = require('./routes/ngoRoutes').default;
 
     app.use('/api/ngos', ngoRoutes);
     app.listen(PORT, () => {

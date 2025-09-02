@@ -3,11 +3,12 @@ import { AppDataSource } from '../app';
 import { Ngo } from '../models/ngoModel';
 
 export class NgoController {
+  public ngoRepository = AppDataSource.getRepository(Ngo);
+
   // GET ALL | GET /api/ngos
   getAllNgos = async (req: Request, res: Response): Promise<void> => {
     try {
-      const ngoRepository = AppDataSource.getRepository(Ngo);
-      const ngos = await ngoRepository.find();
+      const ngos = await this.ngoRepository.find();
 
       res.status(200).json({
         success: true,
@@ -28,8 +29,7 @@ export class NgoController {
   // GET ALL ACTIVATED | GET /api/ngos/activated
   getAllActiveNgos = async (req: Request, res: Response): Promise<void> => {
     try {
-      const ngoRepository = AppDataSource.getRepository(Ngo);
-      const ngos = await ngoRepository.find({
+      const ngos = await this.ngoRepository.find({
         where: { isActivated: true },
         order: { createdAt: 'DESC' },
       });
@@ -53,9 +53,8 @@ export class NgoController {
   // GET SINGLE NGO | GET /api/ngos/:id
   getNgoById = async (req: Request, res: Response): Promise<void> => {
     try {
-      const ngoRepository = AppDataSource.getRepository(Ngo);
       const { id } = req.params;
-      const ngos = await ngoRepository.find({
+      const ngos = await this.ngoRepository.find({
         where: { id },
       });
 
@@ -78,10 +77,9 @@ export class NgoController {
   // CREATE NGO | POST /api/ngos
   createNgo = async (req: Request, res: Response): Promise<void> => {
     try {
-      const ngoRepository = AppDataSource.getRepository(Ngo);
       const ngoData = req.body;
-      const ngo = ngoRepository.create(ngoData);
-      const savedNgo = await ngoRepository.save(ngo);
+      const ngo = this.ngoRepository.create(ngoData);
+      const savedNgo = await this.ngoRepository.save(ngo);
 
       res.status(201).json({
         success: true,
@@ -101,10 +99,9 @@ export class NgoController {
   // UPDATE SINGLE NGO | PUT /api/ngos/:id
   updateNgoById = async (req: Request, res: Response): Promise<void> => {
     try {
-      const ngoRepository = AppDataSource.getRepository(Ngo);
       const { id } = req.params;
       const ngoUpdate = req.body;
-      const existingNgo = await ngoRepository.findOne({ where: { id } });
+      const existingNgo = await this.ngoRepository.findOne({ where: { id } });
 
       if (!existingNgo) {
         res.status(404).json({
@@ -114,9 +111,9 @@ export class NgoController {
         return;
       }
 
-      await ngoRepository.update(id, ngoUpdate);
+      await this.ngoRepository.update(id, ngoUpdate);
 
-      const updatedNgo = await ngoRepository.findOne({ where: { id } });
+      const updatedNgo = await this.ngoRepository.findOne({ where: { id } });
 
       res.status(200).json({
         success: true,
@@ -136,9 +133,8 @@ export class NgoController {
   // DELETE SINGLE NGO | DELETE /api/ngos/:id
   deleteNgoById = async (req: Request, res: Response): Promise<void> => {
     try {
-      const ngoRepository = AppDataSource.getRepository(Ngo);
       const { id } = req.params;
-      const existingNgo = await ngoRepository.findOne({ where: { id } });
+      const existingNgo = await this.ngoRepository.findOne({ where: { id } });
 
       if (!existingNgo) {
         res.status(404).json({
@@ -148,7 +144,7 @@ export class NgoController {
         return;
       }
 
-      await ngoRepository.delete(id);
+      await this.ngoRepository.delete(id);
 
       res.status(204);
     } catch (error) {
