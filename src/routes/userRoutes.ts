@@ -4,10 +4,10 @@ import { UserController } from '../controllers/userController';
 const router = Router();
 const userController = new UserController();
 
-// GET ALL USERss | /users/activated
+// GET ALL USERs | /users/
 router.get('/', userController.getAllUsers);
 
-// GET all ACTIVATE USERs | /users/active
+// GET all ACTIVE USERs | /users/active
 router.get('/active', userController.getAllActiveUsers);
 
 // CREATE USER | /users
