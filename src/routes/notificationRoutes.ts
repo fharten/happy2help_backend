@@ -18,3 +18,5 @@ router.put('/:id', notificationController.updateNotificationById);
 
 // GET SINGLE NOTIFICATION | /notifications/:id
 router.get('/:id', notificationController.getNotificationById);
+
+export default router;
