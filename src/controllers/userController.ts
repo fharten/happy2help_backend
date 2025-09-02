@@ -26,6 +26,30 @@ export class UserController {
     }
   };
 
+  // GET ALL ACTIVATED | GET /api/users/activated
+  getAllActiveUsers = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const users = await this.userRepository.find({
+        where: { isActivated: true },
+        order: { createdAt: 'DESC' },
+      });
+
+      res.status(200).json({
+        success: true,
+        message: 'USERs retrieved successfully',
+        data: users,
+        count: users.length,
+      });
+    } catch (error) {
+      console.error('Error fetching USERs:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to retrieve USERs',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  };
+
   // CREATE SINGLE USER | POST /api/users
   createUser = async (req: Request, res: Response): Promise<void> => {
     try {
