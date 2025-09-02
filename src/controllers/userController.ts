@@ -3,7 +3,7 @@ import { AppDataSource } from '../app';
 import { User } from '../models/userModel';
 
 export class UserController {
-  private userRepository = AppDataSource.getRepository(User);
+  public userRepository = AppDataSource.getRepository(User);
 
   // GET ALL USERS | GET /api/users
   getAllUsers = async (req: Request, res: Response): Promise<void> => {

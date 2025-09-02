@@ -3,7 +3,7 @@ import { AppDataSource } from '../app';
 import { Notification } from '../models/notificationModel';
 
 export class NotificationController {
-  private notificationRepository = AppDataSource.getRepository(Notification);
+  public notificationRepository = AppDataSource.getRepository(Notification);
 
   // GET ALL BY USER ID | GET /api/notifications/user/:userId
   getAllUserNotificationsByUserId = async (req: Request, res: Response): Promise<void> => {

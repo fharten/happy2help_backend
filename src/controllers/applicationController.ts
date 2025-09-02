@@ -3,7 +3,7 @@ import { AppDataSource } from '../app';
 import { Application } from '../models/applicationModel';
 
 export class ApplicationController {
-  private applicationRepository = AppDataSource.getRepository(Application);
+  public applicationRepository = AppDataSource.getRepository(Application);
 
   // GET ALL BY USER ID | GET /api/applications/user/:userId
   getAllApplicationsByUserId = async (req: Request, res: Response): Promise<void> => {
@@ -51,8 +51,8 @@ export class ApplicationController {
 
   // GET ALL BY PROJECT ID | GET /api/applications/project/:projectId
   getAllApplicationsByProjectId = async (req: Request, res: Response): Promise<void> => {
-    const { projectId } = req.params;
     try {
+      const { projectId } = req.params;
       const applications = await this.applicationRepository.find({ where: { projectId } });
 
       res.status(200).json({

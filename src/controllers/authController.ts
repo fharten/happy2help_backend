@@ -8,8 +8,8 @@ import * as bcrypt from 'bcrypt';
 config();
 
 export class AuthController {
-  private userRepository = AppDataSource.getRepository(User);
-  private ngoRepository = AppDataSource.getRepository(Ngo);
+  public userRepository = AppDataSource.getRepository(User);
+  public ngoRepository = AppDataSource.getRepository(Ngo);
 
   // CREATE USER LOGIN | POST /api/auth/user/register
   registerUser = async (req: Request, res: Response) => {
