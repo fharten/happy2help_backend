@@ -7,19 +7,19 @@ const projectController = new ProjectController();
 // GET ALL projects | /projects/activated
 router.get('/', projectController.getAllProjects);
 
-// // GET all ACTIVATEprojects | /projects/active
-router.get('/activated', projectController.getAllActiveProjects);
+// GET all ACTIVE projects | /projects/active
+router.get('/active', projectController.getAllActiveProjects);
 
-// // CREATE USER | /projects
+// CREATE USER | /projects
 router.post('/', projectController.createProject);
 
-// // GET SINGLE USER | /projects/:id
+// GET SINGLE USER | /projects/:id
 router.get('/:id', projectController.getProjectById);
 
-// // UPDATE SINGLE USER | /projects/:id
+// UPDATE SINGLE USER | /projects/:id
 router.put('/:id', projectController.updateProjectById);
 
-// // DELETE SINGLE USER | /projects/:id
+// DELETE SINGLE USER | /projects/:id
 router.delete('/:id', projectController.deleteProjectById);
 
 export default router;
