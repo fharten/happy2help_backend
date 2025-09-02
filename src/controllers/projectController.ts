@@ -26,6 +26,30 @@ export class ProjectController {
     }
   };
 
+  // GET ALL ACTIVE PROJECTS | GET /api/projects/active
+  getAllActiveProjects = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const projects = await this.projectRepository.find({
+        where: { isActive: true },
+        order: { startingAt: 'DESC' },
+      });
+
+      res.status(200).json({
+        success: true,
+        message: 'PROJECTs retrieved successfully',
+        data: projects,
+        count: projects.length,
+      });
+    } catch (error) {
+      console.error('Error fetching PROJECTs:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to retrieve PROJECTs',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  };
+
   // GET SINGLE PROJECT | GET /api/projects/:id
   getProjectById = async (req: Request, res: Response): Promise<void> => {
     try {
