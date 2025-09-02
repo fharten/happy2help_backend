@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 import { UserRole } from '../types/userRole';
 
@@ -28,7 +29,7 @@ export class User {
   @Column({ type: 'text', length: 200, unique: true })
   loginEmail: string;
 
-  @Column({ select: false, length: 30 })
+  @Column({ length: 30 })
   password: string;
 
   @Column({ type: 'text', length: 200, nullable: true })
@@ -84,4 +85,14 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  async comparePasswords(candidatePassword: string): Promise<boolean> {
+    return bcrypt.compare(candidatePassword, this.password);
+  }
+
+  // REMOVE PASSWORD FROM USER OBJECT
+  toJSON() {
+    const { password, ...userWithoutPassword } = this;
+    return userWithoutPassword;
+  }
 }
