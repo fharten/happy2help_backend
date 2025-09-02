@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 @Entity()
 export class Ngo {
@@ -51,7 +52,7 @@ export class Ngo {
   @Column({ type: 'text', length: 200 })
   loginEmail: string;
 
-  @Column({ select: false, length: 30 })
+  @Column({ length: 30 })
   password: string;
 
   @Column({ type: 'text', length: 200, nullable: true })
@@ -68,4 +69,14 @@ export class Ngo {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  async comparePasswords(candidatePassword: string): Promise<boolean> {
+    return bcrypt.compare(candidatePassword, this.password);
+  }
+
+  // REMOVE PASSWORD FROM NGO OBJECT
+  toJSON() {
+    const { password, ...ngoWithoutPassword } = this;
+    return ngoWithoutPassword;
+  }
 }

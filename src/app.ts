@@ -42,9 +42,21 @@ const startServer = async () => {
     await AppDataSource.initialize();
     console.log('Database connected successfully');
 
+    const applicationRoutes = require('./routes/applicationRoutes').default;
+    const authRoutes = require('./routes/authRoutes').default;
     const ngoRoutes = require('./routes/ngoRoutes').default;
+    const notificationRoutes = require('./routes/notificationRoutes').default;
+    const projectRoutes = require('./routes/projectRoutes').default;
+    const skillRoutes = require('./routes/skillRoutes').default;
+    const userRoutes = require('./routes/userRoutes').default;
 
+    app.use('/api/applications', applicationRoutes);
+    app.use('/api/auth', authRoutes);
     app.use('/api/ngos', ngoRoutes);
+    app.use('/api/notifications', notificationRoutes);
+    app.use('/api/projects', projectRoutes);
+    app.use('/api/skills', skillRoutes);
+    app.use('/api/users', userRoutes);
 
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);

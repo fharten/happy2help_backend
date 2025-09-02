@@ -27,7 +27,7 @@ export class NgoController {
   };
 
   // GET ALL ACTIVATED | GET /api/ngos/activated
-  getAllActiveNgos = async (req: Request, res: Response): Promise<void> => {
+  getAllActivatedNgos = async (req: Request, res: Response): Promise<void> => {
     try {
       const ngos = await this.ngoRepository.find({
         where: { isActivated: true },
