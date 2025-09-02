@@ -4,7 +4,7 @@ import { ProjectController } from '../controllers/projectController';
 const router = Router();
 const projectController = new ProjectController();
 
-// GET ALL projects | /projects/activated
+// GET ALL projects | /projects/
 router.get('/', projectController.getAllProjects);
 
 // GET all ACTIVE projects | /projects/active
