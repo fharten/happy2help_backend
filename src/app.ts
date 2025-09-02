@@ -43,8 +43,10 @@ const startServer = async () => {
     console.log('Database connected successfully');
 
     const ngoRoutes = require('./routes/ngoRoutes').default;
+    const authRoutes = require('./routes/authRoutes').default;
 
     app.use('/api/ngos', ngoRoutes);
+    app.use('/api/auth', authRoutes);
 
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
