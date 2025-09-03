@@ -1,13 +1,14 @@
+import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 import { AppDataSource } from '../app';
 import { User } from '../models/userModel';
 import { Ngo } from '../models/ngoModel';
-import * as bcrypt from 'bcrypt';
 
 export class AuthService {
-  static async getUserRepository() {
+  static async getUserRepository(): Promise<Repository<User>> {
     return AppDataSource.getRepository(User);
   }
-  static async getNgoRepository() {
+  static async getNgoRepository(): Promise<Repository<Ngo>> {
     return AppDataSource.getRepository(Ngo);
   }
 
@@ -29,7 +30,7 @@ export class AuthService {
 
   //REGISTER
   static async registerEntity(
-    repositoryGetter: () => Promise<any>,
+    repositoryGetter: () => Promise<Repository<User | Ngo>>,
     email: string,
     password: string,
     entityType: string
@@ -83,7 +84,7 @@ export class AuthService {
 
   // LOGIN
   static async loginEntity(
-    repositoryGetter: () => Promise<any>,
+    repositoryGetter: () => Promise<Repository<User | Ngo>>,
     email: string,
     password: string
   ): Promise<{
