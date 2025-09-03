@@ -82,11 +82,10 @@ export class AuthService {
   }
 
   // LOGIN
-  static async loginUser(
+  static async loginEntity(
     repositoryGetter: () => Promise<any>,
     email: string,
-    password: string,
-    entityType: string
+    password: string
   ): Promise<{
     success: boolean;
     message: string;
@@ -103,6 +102,7 @@ export class AuthService {
     const repository = await repositoryGetter();
     const existingEntity = await repository.findOne({
       where: { loginEmail: email.toLowerCase() },
+      select: ['id', 'loginEmail', 'password'],
     });
 
     if (!existingEntity) {

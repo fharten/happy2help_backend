@@ -85,11 +85,10 @@ export class AuthController {
     try {
       const { email, password } = req.body;
 
-      const result = await AuthService.loginUser(
+      const result = await AuthService.loginEntity(
         () => AuthService.getUserRepository(),
         email,
-        password,
-        'User'
+        password
       );
 
       if (!result.success) {
@@ -116,11 +115,10 @@ export class AuthController {
     try {
       const { email, password } = req.body;
 
-      const result = await AuthService.loginUser(
+      const result = await AuthService.loginEntity(
         () => AuthService.getNgoRepository(),
         email,
-        password,
-        'Ngo'
+        password
       );
 
       if (!result.success) {

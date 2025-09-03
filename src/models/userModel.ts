@@ -29,7 +29,7 @@ export class User {
   @Column({ type: 'text', length: 200, unique: true })
   loginEmail: string;
 
-  @Column({ length: 30 })
+  @Column({ select: false, length: 30 })
   password: string;
 
   @Column({ type: 'text', length: 200, nullable: true })
