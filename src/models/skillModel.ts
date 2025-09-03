@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
 import { Project } from './projectModel';
 @Entity()
 export class Skill {
@@ -12,10 +12,5 @@ export class Skill {
   description: string;
 
   @ManyToMany(() => Project, project => project.skills)
-  @JoinTable({
-    name: 'skill_projects', // Junction table name
-    joinColumn: { name: 'skill_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'project_id', referencedColumnName: 'id' },
-  })
   projects: Project[];
 }
