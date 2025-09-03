@@ -1,72 +1,35 @@
 import { Request, Response } from 'express';
-import { AppDataSource } from '../app';
-import { User } from '../models/userModel';
-import { Ngo } from '../models/ngoModel';
-import { config } from 'dotenv';
-import * as bcrypt from 'bcrypt';
-
-config();
+import { AuthService } from '../services/authService';
 
 export class AuthController {
-  public userRepository = AppDataSource.getRepository(User);
-  public ngoRepository = AppDataSource.getRepository(Ngo);
-
   // CREATE USER LOGIN | POST /api/auth/user/register
   registerUser = async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body;
 
-      if (!email || !password) {
-        res.status(400).json({
-          success: false,
-          message: 'Required fields missing: email, password',
-        });
-        return;
+      const result = await AuthService.registerEntity(
+        () => AuthService.getUserRepository(),
+        email,
+        password,
+        'User'
+      );
+
+      if (!result.success) {
+        return res.status(400).json(result);
       }
 
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-      if (!emailRegex.test(email)) {
-        res.status(400).json({
-          success: false,
-          message: 'Please provide a valid email address',
-        });
-        return;
-      }
-
-      if (password.length < 10) {
-        res.status(400).json({
-          success: false,
-          message: 'Password must be at least 10 characters long',
-        });
-        return;
-      }
-
-      const existingUser = await this.userRepository.findOne({
-        where: { loginEmail: email.toLowerCase() },
-      });
-
-      if (existingUser) {
-        res.status(409).json({
-          success: false,
-          message: 'User with this email already exists',
-        });
-        return;
-      }
-
-      const saltRounds = process.env.SALT_ROUNDS ? parseInt(process.env.SALT_ROUNDS, 10) : 10;
-      const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-      const user = this.userRepository.create({
+      // Create user with hashed password
+      const userRepository = await AuthService.getUserRepository();
+      const user = userRepository.create({
         loginEmail: email.toLowerCase(),
-        password: hashedPassword,
+        password: result.hashedPassword,
       });
 
-      await this.userRepository.save(user);
+      await userRepository.save(user);
 
       res.status(201).json({
         success: true,
-        message: 'User registered successfully',
+        message: result.message,
       });
     } catch (error) {
       console.error('Error creating user:', error);
@@ -83,57 +46,29 @@ export class AuthController {
     try {
       const { email, password } = req.body;
 
-      if (!email || !password) {
-        res.status(400).json({
-          success: false,
-          message: 'Required fields missing: email, password',
-        });
-        return;
+      const result = await AuthService.registerEntity(
+        () => AuthService.getNgoRepository(),
+        email,
+        password,
+        'Ngo'
+      );
+
+      if (!result.success) {
+        return res.status(400).json(result);
       }
 
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-      if (!emailRegex.test(email)) {
-        res.status(400).json({
-          success: false,
-          message: 'Please provide a valid email address',
-        });
-        return;
-      }
-
-      if (password.length < 10) {
-        res.status(400).json({
-          success: false,
-          message: 'Password must be at least 10 characters long',
-        });
-        return;
-      }
-
-      const existingNgo = await this.ngoRepository.findOne({
-        where: { loginEmail: email.toLowerCase() },
-      });
-
-      if (existingNgo) {
-        res.status(409).json({
-          success: false,
-          message: 'Ngo with this email already exists',
-        });
-        return;
-      }
-
-      const saltRounds = process.env.SALT_ROUNDS ? parseInt(process.env.SALT_ROUNDS, 10) : 10;
-      const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-      const ngo = this.ngoRepository.create({
+      // Create NGO with hashed password
+      const ngoRepository = await AuthService.getNgoRepository();
+      const ngo = ngoRepository.create({
         loginEmail: email.toLowerCase(),
-        password: hashedPassword,
+        password: result.hashedPassword,
       });
 
-      await this.ngoRepository.save(ngo);
+      await ngoRepository.save(ngo);
 
       res.status(201).json({
         success: true,
-        message: 'Ngo registered successfully',
+        message: result.message,
       });
     } catch (error) {
       console.error('Error creating ngo:', error);
@@ -150,43 +85,23 @@ export class AuthController {
     try {
       const { email, password } = req.body;
 
-      if (!email || !password) {
-        res.status(400).json({
-          success: false,
-          message: 'Required fields missing: email, password',
-        });
-        return;
-      }
+      const result = await AuthService.loginEntity(
+        () => AuthService.getUserRepository(),
+        email,
+        password
+      );
 
-      const existingUser = await this.userRepository.findOne({
-        where: { loginEmail: email.toLowerCase() },
-      });
-
-      if (!existingUser) {
-        res.status(401).json({
-          success: false,
-          message: 'Invalid email or password',
-        });
-        return;
-      }
-
-      const isValidPassword = await existingUser.comparePasswords(password);
-
-      if (!isValidPassword) {
-        res.status(401).json({
-          success: false,
-          message: 'Invalid email or password',
-        });
-        return;
+      if (!result.success) {
+        return res.status(401).json(result);
       }
 
       res.status(200).json({
         success: true,
-        message: 'Login successful',
-        data: existingUser,
+        message: result.message,
+        data: result.data,
       });
     } catch (error) {
-      console.error('Error creating user:', error);
+      console.error('Error logging in user:', error);
       res.status(500).json({
         success: false,
         message: 'Failed to login user',
@@ -200,46 +115,26 @@ export class AuthController {
     try {
       const { email, password } = req.body;
 
-      if (!email || !password) {
-        res.status(400).json({
-          success: false,
-          message: 'Required fields missing: email, password',
-        });
-        return;
-      }
+      const result = await AuthService.loginEntity(
+        () => AuthService.getNgoRepository(),
+        email,
+        password
+      );
 
-      const existingNgo = await this.ngoRepository.findOne({
-        where: { loginEmail: email.toLowerCase() },
-      });
-
-      if (!existingNgo) {
-        res.status(401).json({
-          success: false,
-          message: 'Invalid email or password',
-        });
-        return;
-      }
-
-      const isValidPassword = await existingNgo.comparePasswords(password);
-
-      if (!isValidPassword) {
-        res.status(401).json({
-          success: false,
-          message: 'Invalid email or password',
-        });
-        return;
+      if (!result.success) {
+        return res.status(401).json(result);
       }
 
       res.status(200).json({
         success: true,
-        message: 'Login successful',
-        data: existingNgo,
+        message: result.message,
+        data: result.data,
       });
     } catch (error) {
-      console.error('Error creating ngo:', error);
+      console.error('Error logging in ngo:', error);
       res.status(500).json({
         success: false,
-        message: 'Failed to create ngo',
+        message: 'Failed to login ngo',
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
