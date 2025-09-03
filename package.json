@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "seed": "ts-node src/seed.ts"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
