@@ -4,8 +4,10 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { Project } from './projectModel';
 
 @Entity()
 export class Ngo {
@@ -31,6 +33,9 @@ export class Ngo {
   })
   industry?: string[];
 
+  @OneToMany(() => Project, project => project.ngo)
+  projects: Project[];
+
   @Column({ type: 'text', length: 255, nullable: true })
   streetAndNumber?: string;
 
@@ -43,7 +48,7 @@ export class Ngo {
   @Column({ type: 'text', length: 200, nullable: true })
   state?: string;
 
-  @Column({ type: 'text', length: 200 })
+  @Column({ type: 'text', length: 200, nullable: true })
   principal: string;
 
   @Column({ type: 'text', length: 200, nullable: true })

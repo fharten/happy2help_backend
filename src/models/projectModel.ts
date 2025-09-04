@@ -1,11 +1,25 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToMany,
+  JoinTable,
+  JoinColumn,
+  ManyToOne,
+} from 'typeorm';
 import { Category } from './categoryModel';
 import { Skill } from './skillModel';
+import { Ngo } from './ngoModel';
+import { User } from './userModel';
 
 @Entity()
 export class Project {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @ManyToOne(() => Ngo, ngo => ngo.projects, { eager: true })
+  @JoinColumn({ name: 'ngoId' })
+  ngo: Ngo;
 
   @Column({ type: 'text', length: 200 })
   name: string;
@@ -39,11 +53,14 @@ export class Project {
   @Column({ type: 'text', length: 200 })
   state: string;
 
-  @Column({ type: 'text', length: 200 })
+  @Column({ type: 'text', length: 200, nullable: true })
   principal: string;
 
   @Column({ type: 'text', length: 200, nullable: true })
   compensation?: string;
+
+  @ManyToMany(() => User, user => user.projects)
+  participants: User[];
 
   @Column({ default: false })
   isActive: boolean;
