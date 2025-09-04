@@ -77,6 +77,12 @@ export class NgoController {
   createNgo = async (req: Request, res: Response): Promise<void> => {
     try {
       const ngoData = req.body;
+
+      if (ngoData.email && !ngoData.loginEmail) {
+        ngoData.loginEmail = ngoData.email;
+        delete ngoData.email;
+      }
+
       const ngo = this.ngoRepository.create(ngoData);
       const savedNgo = await this.ngoRepository.save(ngo);
 
