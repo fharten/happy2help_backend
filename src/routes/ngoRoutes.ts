@@ -19,6 +19,9 @@ router.get('/:id', ngoController.getNgoById);
 // UPDATE SINGLE NGO | /ngos/:id
 router.put('/:id', ngoController.updateNgoById);
 
+// GET ALL PROJECTS OF NGO | /ngos/:id/projects
+router.get('/:id/projects', ngoController.getNgoProjects);
+
 // DELETE SINGLE NGO | /ngos/:id
 router.delete('/:id', ngoController.deleteNgoById);
 

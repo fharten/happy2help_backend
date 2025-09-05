@@ -161,4 +161,49 @@ export class UserController {
       });
     }
   };
+
+  // GET ALL PROJECTS OF USER | GET /api/users/:id/projects
+  getUserProjects = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+
+      const user = await this.userRepository.findOne({
+        where: { id },
+        relations: ['projects', 'projects.ngo'],
+      });
+
+      if (!user) {
+        res.status(404).json({
+          success: false,
+          message: 'User not found',
+        });
+        return;
+      }
+
+      const userDisplayName =
+        user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.id;
+
+      res.status(200).json({
+        success: true,
+        message: `Projects for user "${userDisplayName}" retrieved successfully`,
+        data: {
+          user: {
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            projectCount: user.projects.length,
+          },
+          projects: user.projects,
+        },
+        count: user.projects.length,
+      });
+    } catch (error) {
+      console.error('Error fetching user projects:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to retrieve user projects',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  };
 }

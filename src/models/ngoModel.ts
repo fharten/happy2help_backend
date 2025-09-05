@@ -4,8 +4,10 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { Project } from './projectModel';
 
 @Entity()
 export class Ngo {
@@ -31,6 +33,17 @@ export class Ngo {
   })
   industry?: string[];
 
+  // Beziehung zu Project (1:n):
+  /**
+   * Ein Ngo kann mehrere Projekte besitzen (OneToMany).
+   * Dies ist die Hauptseite der Beziehung.
+   * Gegenstück im Project-Modell: @ManyToOne(() => Ngo, ngo => ngo.projects)
+   * Zielentität: () => Project – Verweist auf die Project-Tabelle.
+   * Rückbezug: project.ngo – Das Feld im Project-Modell, das auf dieses Ngo verweist.
+   */
+  @OneToMany(() => Project, project => project.ngo)
+  projects: Project[];
+
   @Column({ type: 'text', length: 255, nullable: true })
   streetAndNumber?: string;
 
@@ -43,7 +56,7 @@ export class Ngo {
   @Column({ type: 'text', length: 200, nullable: true })
   state?: string;
 
-  @Column({ type: 'text', length: 200 })
+  @Column({ type: 'text', length: 200, nullable: true })
   principal: string;
 
   @Column({ type: 'text', length: 200, nullable: true })

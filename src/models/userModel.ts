@@ -4,10 +4,13 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
 import { UserRole } from '../types/userRole';
+import { Project } from './projectModel';
 
 @Entity()
 export class User {
@@ -85,6 +88,14 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @ManyToMany(() => Project, project => project.participants, { eager: true })
+  @JoinTable({
+    name: 'user_projects',
+    joinColumn: { name: 'user_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'project_id', referencedColumnName: 'id' },
+  })
+  projects: Project[];
 
   async comparePasswords(candidatePassword: string): Promise<boolean> {
     return bcrypt.compare(candidatePassword, this.password);
