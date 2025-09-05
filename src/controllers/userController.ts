@@ -180,9 +180,12 @@ export class UserController {
         return;
       }
 
+      const userDisplayName =
+        user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.id;
+
       res.status(200).json({
         success: true,
-        message: `Projects for user "${user.firstName} ${user.lastName}" retrieved successfully`,
+        message: `Projects for user "${userDisplayName}" retrieved successfully`,
         data: {
           user: {
             id: user.id,
