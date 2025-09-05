@@ -44,7 +44,15 @@ export class AuthController {
   // CREATE NGO LOGIN | POST /api/auth/ngo/register
   registerNgo = async (req: Request, res: Response) => {
     try {
-      const { email, password } = req.body;
+      const { name, email, password, principal } = req.body;
+
+      // Validate required fields
+      if (!principal) {
+        return res.status(400).json({
+          success: false,
+          message: 'Principal name is required',
+        });
+      }
 
       const result = await AuthService.registerEntity(
         () => AuthService.getNgoRepository(),
@@ -60,6 +68,8 @@ export class AuthController {
       // Create NGO with hashed password
       const ngoRepository = await AuthService.getNgoRepository();
       const ngo = ngoRepository.create({
+        name: name,
+        principal: principal,
         loginEmail: email.toLowerCase(),
         password: result.hashedPassword,
       });
