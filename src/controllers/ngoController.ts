@@ -155,4 +155,45 @@ export class NgoController {
       });
     }
   };
+
+  // GET ALL PROJECTS OF NGO | GET /api/ngos/:id/projects
+  getNgoProjects = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+
+      const ngo = await this.ngoRepository.findOne({
+        where: { id },
+        relations: ['projects'],
+      });
+
+      if (!ngo) {
+        res.status(404).json({
+          success: false,
+          message: 'NGO not found',
+        });
+        return;
+      }
+
+      res.status(200).json({
+        success: true,
+        message: `Projects for NGO "${ngo.name}" retrieved successfully`,
+        data: {
+          ngo: {
+            id: ngo.id,
+            name: ngo.name,
+            projectCount: ngo.projects.length,
+          },
+          projects: ngo.projects,
+        },
+        count: ngo.projects.length,
+      });
+    } catch (error) {
+      console.error('Error fetching NGO projects:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to retrieve NGO projects',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  };
 }

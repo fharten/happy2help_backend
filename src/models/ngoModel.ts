@@ -33,6 +33,14 @@ export class Ngo {
   })
   industry?: string[];
 
+  // Beziehung zu Project (1:n):
+  /**
+   * Ein Ngo kann mehrere Projekte besitzen (OneToMany).
+   * Dies ist die Hauptseite der Beziehung.
+   * Gegenstück im Project-Modell: @ManyToOne(() => Ngo, ngo => ngo.projects)
+   * Zielentität: () => Project – Verweist auf die Project-Tabelle.
+   * Rückbezug: project.ngo – Das Feld im Project-Modell, das auf dieses Ngo verweist.
+   */
   @OneToMany(() => Project, project => project.ngo)
   projects: Project[];
 

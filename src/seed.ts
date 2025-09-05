@@ -454,6 +454,7 @@ const seedData = async () => {
             'Entwicklung einer modernen, barrierefreien Webseite für Online-Bildungsangebote mit interaktiven Lernmodulen.',
           images: ['project1_img1.jpg', 'project1_img2.jpg'],
           categories: [categories[0]], // Education
+          ngoId: ngos[0].id, // Hilfe für Alle e.V.
           ngo: ngos[0], // Hilfe für Alle e.V.
           city: 'Berlin',
           zipCode: 10115,
@@ -471,6 +472,7 @@ const seedData = async () => {
             'Organisation von interaktiven Umwelt-Workshops an Grundschulen zur Sensibilisierung für Klimaschutz.',
           images: ['project2_img1.jpg'],
           categories: [categories[2], categories[0]], // Environment, Education
+          ngoId: ngos[1].id, // Umwelt Retten e.V.
           ngo: ngos[1], // Umwelt Retten e.V.
           city: 'Hamburg',
           zipCode: 20095,
@@ -487,6 +489,7 @@ const seedData = async () => {
             'Kreatives Kunstprojekt für Kinder aus sozial schwachen Familien mit professioneller Foto-Dokumentation.',
           images: ['project3_img1.jpg', 'project3_img2.jpg', 'project3_img3.jpg'],
           categories: [categories[4], categories[11]], // Arts & Culture, Youth Development
+          ngoId: ngos[4].id, // Kultur Verbindet e.V.
           ngo: ngos[4], // Kultur Verbindet e.V.
           city: 'Dresden',
           zipCode: 1067,
@@ -504,6 +507,7 @@ const seedData = async () => {
             'Technische Unterstützung und Schulungen für ältere Menschen im Umgang mit modernen Technologien.',
           images: ['project4_img1.jpg'],
           categories: [categories[12], categories[6]], // Senior Care, Technology
+          ngoId: ngos[5].id, // TechForGood e.V.
           ngo: ngos[5], // TechForGood e.V.
           city: 'Stuttgart',
           zipCode: 70173,
@@ -521,6 +525,7 @@ const seedData = async () => {
             'Social Media Kampagne zur Aufklärung über Tierschutz und Adoption von Tieren aus dem Tierheim.',
           images: ['project5_img1.jpg', 'project5_img2.jpg'],
           categories: [categories[8]], // Animal Welfare
+          ngoId: ngos[6].id, // Tierschutz Plus e.V.
           ngo: ngos[6], // Tierschutz Plus e.V.
           city: 'Düsseldorf',
           zipCode: 40210,
@@ -537,6 +542,7 @@ const seedData = async () => {
             'Sportprojekt zur Integration von Geflüchteten und Menschen mit Migrationshintergrund durch gemeinsame Aktivitäten.',
           images: ['project6_img1.jpg'],
           categories: [categories[5], categories[7]], // Sports & Recreation, Community Development
+          ngoId: ngos[7].id, // Sport für Alle e.V.
           ngo: ngos[7], // Sport für Alle e.V.
           city: 'Frankfurt am Main',
           zipCode: 60311,
@@ -554,6 +560,7 @@ const seedData = async () => {
             'Niedrigschwellige psychologische Beratung und Unterstützung für Menschen in schwierigen Lebenssituationen.',
           images: ['project7_img1.jpg'],
           categories: [categories[14], categories[3]], // Mental Health, Social Services
+          ngoId: ngos[3].id, // Gesundheit für Alle e.V.
           ngo: ngos[3], // Gesundheit für Alle e.V.
           city: 'Köln',
           zipCode: 50667,
@@ -571,6 +578,7 @@ const seedData = async () => {
             'Übersetzungshilfe und Dolmetscherdienste für Geflüchtete bei Behördengängen und Arztbesuchen.',
           images: ['project8_img1.jpg'],
           categories: [categories[10], categories[3]], // Human Rights, Social Services
+          ngoId: ngos[2].id, // Kinder Zukunft e.V.
           ngo: ngos[2], // Kinder Zukunft e.V.
           city: 'München',
           zipCode: 80331,
@@ -587,6 +595,7 @@ const seedData = async () => {
             'Gemeinschaftsgarten-Projekt zur Förderung der sozialen Teilhabe und des Wohlbefindens älterer Menschen.',
           images: ['project9_img1.jpg', 'project9_img2.jpg'],
           categories: [categories[12], categories[2]], // Senior Care, Environment
+          ngoId: ngos[8].id, // Senioren Hilfe e.V.
           ngo: ngos[8], // Senioren Hilfe e.V.
           city: 'Hannover',
           zipCode: 30159,
@@ -604,6 +613,7 @@ const seedData = async () => {
             'Workshop-Reihe zur Stärkung von Frauen in beruflichen und persönlichen Bereichen mit Fokus auf Selbstständigkeit.',
           images: ['project10_img1.jpg'],
           categories: [categories[17], categories[0]], // Women Empowerment, Education
+          ngoId: ngos[9].id, // Frauenförderung e.V.
           ngo: ngos[9], // Frauenförderung e.V.
           city: 'Bremen',
           zipCode: 28195,
@@ -621,6 +631,7 @@ const seedData = async () => {
             'Kostenlose Kochkurse für Menschen mit geringem Einkommen zur Förderung gesunder und kostengünstiger Ernährung.',
           images: ['project11_img1.jpg', 'project11_img2.jpg'],
           categories: [categories[15], categories[13]], // Food Security, Poverty Alleviation
+          ngoId: ngos[0].id, // Hilfe für Alle e.V.
           ngo: ngos[0], // Hilfe für Alle e.V.
           city: 'Berlin',
           zipCode: 10115,
@@ -637,6 +648,7 @@ const seedData = async () => {
             'Produktion eines Dokumentarfilms über lokale Nachhaltigkeitsinitiativen zur Sensibilisierung der Öffentlichkeit.',
           images: ['project12_img1.jpg'],
           categories: [categories[19], categories[2]], // Climate Action, Environment
+          ngoId: ngos[1].id, // Umwelt Retten e.V.
           ngo: ngos[1], // Umwelt Retten e.V.
           city: 'Hamburg',
           zipCode: 20095,

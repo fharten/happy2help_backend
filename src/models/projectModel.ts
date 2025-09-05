@@ -17,6 +17,18 @@ export class Project {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  // ngoId ist der Foreign Key, und speichert die ID des jeweiligen NGOs
+  @Column({ type: 'uuid' })
+  ngoId: string;
+
+  // Beziehung zu Ngo (n:1):
+  /**
+   * Jedes Project gehört genau zu einem Ngo (ManyToOne).
+   * Dies ist die Nebenseite der Beziehung.
+   * Gegenstück im Ngo-Modell: @OneToMany(() => Project, project => project.ngo)
+   * Zielentität: () => Ngo – Verweist auf die Ngo-Tabelle.
+   * Rückbezug: ngo.projects – Das Feld im Ngo-Modell, das alle zugehörigen Projekte enthält.
+   */
   @ManyToOne(() => Ngo, ngo => ngo.projects, { eager: true })
   @JoinColumn({ name: 'ngoId' })
   ngo: Ngo;
