@@ -88,7 +88,7 @@ export class ProjectController {
   // CREATE PROJECT | POST /api/projects
   createProject = async (req: Request, res: Response): Promise<void> => {
     try {
-      const projectData = req.body;
+      const projectData: Project = req.body;
 
       if (
         !projectData.name ||
@@ -116,7 +116,7 @@ export class ProjectController {
       const savedProject = await this.projectRepository.save(project);
 
       const fullProject = await this.projectRepository.findOne({
-        where: { id: savedProject[0].id },
+        where: { id: savedProject.id },
         relations: ['ngo'],
       });
 
