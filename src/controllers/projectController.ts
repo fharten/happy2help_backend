@@ -116,7 +116,7 @@ export class ProjectController {
       const savedProject = await this.projectRepository.save(project);
 
       const fullProject = await this.projectRepository.findOne({
-        where: { id: savedProject.id },
+        where: { id: savedProject[0].id },
         relations: ['ngo'],
       });
 
