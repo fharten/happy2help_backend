@@ -19,8 +19,11 @@ router.get('/:id', userController.getUserById);
 // UPDATE SINGLE USER | /users/:id
 router.put('/:id', userController.updateUserById);
 
-// GET ALL PROJECTS OF USER | /users/:id/projects
+// GET ALL ACCEPTED PROJECTS OF USER | /users/:id/projects
 router.get('/:id/projects', userController.getUserProjects);
+
+// GET ALL APPLICATIONS OF USER | /users/:id/applications
+router.get('/:id/applications', userController.getUserApplications);
 
 // DELETE SINGLE USER | /users/:id
 router.delete('/:id', userController.deleteUserById);
