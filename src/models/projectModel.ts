@@ -6,11 +6,13 @@ import {
   JoinTable,
   JoinColumn,
   ManyToOne,
+  OneToMany,
 } from 'typeorm';
 import { Category } from './categoryModel';
 import { Skill } from './skillModel';
 import { Ngo } from './ngoModel';
 import { User } from './userModel';
+import { Application } from './applicationModel';
 
 @Entity()
 export class Project {
@@ -50,7 +52,7 @@ export class Project {
 
   @ManyToMany(() => Category, category => category.projects, { eager: true })
   @JoinTable({
-    name: 'project_categories', // Junction table name
+    name: 'project_categories',
     joinColumn: { name: 'project_id', referencedColumnName: 'id' },
     inverseJoinColumn: { name: 'category_id', referencedColumnName: 'id' },
   })
@@ -71,15 +73,20 @@ export class Project {
   @Column({ type: 'text', length: 200, nullable: true })
   compensation?: string;
 
+  // ACCEPTED USERS (many-to-many)
   @ManyToMany(() => User, user => user.projects)
   participants: User[];
+
+  // APPLICATIONS FOR PROJECT (one-to-many)
+  @OneToMany(() => Application, application => application.project)
+  applications: Application[];
 
   @Column({ default: false })
   isActive: boolean;
 
   @ManyToMany(() => Skill, skill => skill.projects, { eager: true })
   @JoinTable({
-    name: 'project_skills', // Junction table name
+    name: 'project_skills',
     joinColumn: { name: 'project_id', referencedColumnName: 'id' },
     inverseJoinColumn: { name: 'skill_id', referencedColumnName: 'id' },
   })

@@ -1,5 +1,16 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { ApplicationStatus } from '../types/applicationRole';
+import { User } from './userModel';
+import { Project } from './projectModel';
+import { Ngo } from './ngoModel';
 
 @Entity()
 export class Application {
@@ -21,4 +32,29 @@ export class Application {
     default: ApplicationStatus.PENDING,
   })
   status: ApplicationStatus;
+
+  @Column({ type: 'text', nullable: true })
+  message?: string;
+
+  @Column({ type: 'text', nullable: true })
+  reviewNotes?: string;
+
+  @CreateDateColumn()
+  appliedAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  // RELATIONSHIPS
+  @ManyToOne(() => User, { eager: true })
+  @JoinColumn({ name: 'userId' })
+  user: User;
+
+  @ManyToOne(() => Project, { eager: true })
+  @JoinColumn({ name: 'projectId' })
+  project: Project;
+
+  @ManyToOne(() => Ngo, { eager: true })
+  @JoinColumn({ name: 'ngoId' })
+  ngo: Ngo;
 }
