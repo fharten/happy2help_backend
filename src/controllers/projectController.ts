@@ -8,7 +8,9 @@ export class ProjectController {
   // GET ALL | GET /api/projects
   getAllProjects = async (req: Request, res: Response): Promise<void> => {
     try {
-      const projects = await this.projectRepository.find();
+      const projects = await this.projectRepository.find({
+        relations: ['ngo'],
+      });
 
       res.status(200).json({
         success: true,
@@ -31,20 +33,21 @@ export class ProjectController {
     try {
       const projects = await this.projectRepository.find({
         where: { isActive: true },
+        relations: ['ngo'],
         order: { startingAt: 'DESC' },
       });
 
       res.status(200).json({
         success: true,
-        message: 'PROJECTs retrieved successfully',
+        message: 'Active projects retrieved successfully',
         data: projects,
         count: projects.length,
       });
     } catch (error) {
-      console.error('Error fetching PROJECTs:', error);
+      console.error('Error fetching active projects:', error);
       res.status(500).json({
         success: false,
-        message: 'Failed to retrieve PROJECTs',
+        message: 'Failed to retrieve active projects',
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
@@ -54,20 +57,29 @@ export class ProjectController {
   getProjectById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const projects = await this.projectRepository.findOne({
+      const project = await this.projectRepository.findOne({
         where: { id },
+        relations: ['ngo', 'participants'],
       });
+
+      if (!project) {
+        res.status(404).json({
+          success: false,
+          message: 'Project not found',
+        });
+        return;
+      }
 
       res.status(200).json({
         success: true,
         message: 'Project retrieved successfully',
-        data: projects,
+        data: project,
       });
     } catch (error) {
       console.error('Error fetching Project:', error);
       res.status(500).json({
         success: false,
-        message: 'Failed to retrieve Projec',
+        message: 'Failed to retrieve Project',
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
@@ -89,23 +101,29 @@ export class ProjectController {
         !projectData.principal ||
         !projectData.skills ||
         !projectData.startingAt ||
-        !projectData.endingAt
+        !projectData.endingAt ||
+        !projectData.ngoId
       ) {
         res.status(400).json({
           success: false,
           message:
-            'Name, description, images, categories, city, zip code, state, principal, skills, startingAt and endingAt are required fields',
+            'Name, description, images, categories, city, zip code, state, principal, skills, startingAt, endingAt, and ngoId are required fields',
         });
         return;
       }
 
       const project = this.projectRepository.create(projectData);
-      const savedNgo = await this.projectRepository.save(project);
+      const savedProject = await this.projectRepository.save(project);
+
+      const fullProject = await this.projectRepository.findOne({
+        where: { id: savedProject.id },
+        relations: ['ngo'],
+      });
 
       res.status(201).json({
         success: true,
         message: 'Project created successfully',
-        data: savedNgo,
+        data: fullProject,
       });
     } catch (error) {
       console.error('Error creating Project:', error);
@@ -123,27 +141,6 @@ export class ProjectController {
       const { id } = req.params;
       const projectUpdate = req.body;
 
-      if (
-        !projectUpdate.name ||
-        !projectUpdate.description ||
-        !projectUpdate.images ||
-        !projectUpdate.categories ||
-        !projectUpdate.city ||
-        !projectUpdate.zipCode ||
-        !projectUpdate.state ||
-        !projectUpdate.principal ||
-        !projectUpdate.skills ||
-        !projectUpdate.startingAt ||
-        !projectUpdate.endingAt
-      ) {
-        res.status(400).json({
-          success: false,
-          message:
-            'Name, description, images, categories, city, zip code, state, principal, skills, startingAt and endingAt are required fields',
-        });
-        return;
-      }
-
       const existingProject = await this.projectRepository.findOne({ where: { id } });
 
       if (!existingProject) {
@@ -156,11 +153,14 @@ export class ProjectController {
 
       await this.projectRepository.update(id, projectUpdate);
 
-      const updatedProject = await this.projectRepository.findOne({ where: { id } });
+      const updatedProject = await this.projectRepository.findOne({
+        where: { id },
+        relations: ['ngo'],
+      });
 
       res.status(200).json({
         success: true,
-        message: 'Project retrieved successfully',
+        message: 'Project updated successfully',
         data: updatedProject,
       });
     } catch (error) {
@@ -195,6 +195,156 @@ export class ProjectController {
       res.status(500).json({
         success: false,
         message: 'Failed to delete Project',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  };
+
+  // GET ALL APPLICATIONS FOR PROJECT | GET /api/projects/:id/applications
+  getProjectApplications = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+
+      const project = await this.projectRepository.findOne({
+        where: { id },
+        relations: ['applications', 'applications.user', 'ngo'],
+      });
+
+      if (!project) {
+        res.status(404).json({
+          success: false,
+          message: 'Project not found',
+        });
+        return;
+      }
+
+      project.applications.sort(
+        (a, b) => new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime()
+      );
+
+      res.status(200).json({
+        success: true,
+        message: `Applications for project "${project.name}" retrieved successfully`,
+        data: {
+          project: {
+            id: project.id,
+            name: project.name,
+            ngo: project.ngo,
+            applicationCount: project.applications.length,
+          },
+          applications: project.applications,
+        },
+        count: project.applications.length,
+      });
+    } catch (error) {
+      console.error('Error fetching project applications:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to retrieve project applications',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  };
+
+  // GET ALL PARTICIPANTS FOR PROJECT | GET /api/projects/:id/participants
+  getProjectParticipants = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+
+      const project = await this.projectRepository.findOne({
+        where: { id },
+        relations: ['participants', 'ngo'],
+      });
+
+      if (!project) {
+        res.status(404).json({
+          success: false,
+          message: 'Project not found',
+        });
+        return;
+      }
+
+      res.status(200).json({
+        success: true,
+        message: `Participants for project "${project.name}" retrieved successfully`,
+        data: {
+          project: {
+            id: project.id,
+            name: project.name,
+            ngo: project.ngo,
+            participantCount: project.participants.length,
+          },
+          participants: project.participants,
+        },
+        count: project.participants.length,
+      });
+    } catch (error) {
+      console.error('Error fetching project participants:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to retrieve project participants',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  };
+
+  // GET PROJECT STATISTICS | GET /api/projects/:id/stats
+  getProjectStats = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+
+      const project = await this.projectRepository.findOne({
+        where: { id },
+        relations: ['applications', 'participants', 'ngo'],
+      });
+
+      if (!project) {
+        res.status(404).json({
+          success: false,
+          message: 'Project not found',
+        });
+        return;
+      }
+
+      const totalApplications = project.applications.length;
+      const pendingApplications = project.applications.filter(
+        app => app.status === 'pending'
+      ).length;
+      const acceptedApplications = project.applications.filter(
+        app => app.status === 'accepted'
+      ).length;
+      const rejectedApplications = project.applications.filter(
+        app => app.status === 'rejected'
+      ).length;
+      const totalParticipants = project.participants.length;
+
+      res.status(200).json({
+        success: true,
+        message: `Statistics for project "${project.name}" retrieved successfully`,
+        data: {
+          project: {
+            id: project.id,
+            name: project.name,
+            ngo: project.ngo,
+          },
+          statistics: {
+            totalApplications,
+            pendingApplications,
+            acceptedApplications,
+            rejectedApplications,
+            totalParticipants,
+            acceptanceRate:
+              totalApplications > 0
+                ? ((acceptedApplications / totalApplications) * 100).toFixed(2) + '%'
+                : '0%',
+          },
+        },
+      });
+    } catch (error) {
+      console.error('Error fetching project statistics:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to retrieve project statistics',
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }

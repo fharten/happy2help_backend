@@ -54,14 +54,22 @@ export class NgoController {
   getNgoById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const ngos = await this.ngoRepository.findOne({
+      const ngo = await this.ngoRepository.findOne({
         where: { id },
       });
+
+      if (!ngo) {
+        res.status(404).json({
+          success: false,
+          message: 'NGO not found',
+        });
+        return;
+      }
 
       res.status(200).json({
         success: true,
         message: 'NGO retrieved successfully',
-        data: ngos,
+        data: ngo,
       });
     } catch (error) {
       console.error('Error fetching NGO:', error);
@@ -77,12 +85,6 @@ export class NgoController {
   createNgo = async (req: Request, res: Response): Promise<void> => {
     try {
       const ngoData = req.body;
-
-      if (ngoData.email && !ngoData.loginEmail) {
-        ngoData.loginEmail = ngoData.email;
-        delete ngoData.email;
-      }
-
       const ngo = this.ngoRepository.create(ngoData);
       const savedNgo = await this.ngoRepository.save(ngo);
 
@@ -122,7 +124,7 @@ export class NgoController {
 
       res.status(200).json({
         success: true,
-        message: 'NGO retrieved successfully',
+        message: 'NGO updated successfully',
         data: updatedNgo,
       });
     } catch (error) {
@@ -151,7 +153,7 @@ export class NgoController {
 
       await this.ngoRepository.delete(id);
 
-      res.status(204);
+      res.status(204).send();
     } catch (error) {
       console.error('Error deleting NGO:', error);
       res.status(500).json({
@@ -198,6 +200,100 @@ export class NgoController {
       res.status(500).json({
         success: false,
         message: 'Failed to retrieve NGO projects',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  };
+
+  // GET ALL APPLICATIONS FOR NGO | GET /api/ngos/:id/applications
+  getNgoApplications = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+
+      const ngo = await this.ngoRepository.findOne({
+        where: { id },
+        relations: ['applications', 'applications.user', 'applications.project'],
+      });
+
+      if (!ngo) {
+        res.status(404).json({
+          success: false,
+          message: 'NGO not found',
+        });
+        return;
+      }
+
+      ngo.applications.sort(
+        (a, b) => new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime()
+      );
+
+      res.status(200).json({
+        success: true,
+        message: `Applications for NGO "${ngo.name}" retrieved successfully`,
+        data: {
+          ngo: {
+            id: ngo.id,
+            name: ngo.name,
+            applicationCount: ngo.applications.length,
+          },
+          applications: ngo.applications,
+        },
+        count: ngo.applications.length,
+      });
+    } catch (error) {
+      console.error('Error fetching NGO applications:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to retrieve NGO applications',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  };
+
+  // GET APPLICATIONS BY STATUS FOR NGO | GET /api/ngos/:id/applications/:status
+  getNgoApplicationsByStatus = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id, status } = req.params;
+
+      const ngo = await this.ngoRepository.findOne({
+        where: { id },
+        relations: ['applications', 'applications.user', 'applications.project'],
+      });
+
+      if (!ngo) {
+        res.status(404).json({
+          success: false,
+          message: 'NGO not found',
+        });
+        return;
+      }
+
+      const filteredApplications = ngo.applications.filter(
+        application => application.status === status
+      );
+
+      filteredApplications.sort(
+        (a, b) => new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime()
+      );
+
+      res.status(200).json({
+        success: true,
+        message: `${status} applications for NGO "${ngo.name}" retrieved successfully`,
+        data: {
+          ngo: {
+            id: ngo.id,
+            name: ngo.name,
+            applicationCount: filteredApplications.length,
+          },
+          applications: filteredApplications,
+        },
+        count: filteredApplications.length,
+      });
+    } catch (error) {
+      console.error('Error fetching NGO applications by status:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to retrieve NGO applications',
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }

@@ -36,15 +36,15 @@ export class UserController {
 
       res.status(200).json({
         success: true,
-        message: 'USERs retrieved successfully',
+        message: 'Users retrieved successfully',
         data: users,
         count: users.length,
       });
     } catch (error) {
-      console.error('Error fetching USERs:', error);
+      console.error('Error fetching users:', error);
       res.status(500).json({
         success: false,
-        message: 'Failed to retrieve USERs',
+        message: 'Failed to retrieve users',
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
@@ -123,7 +123,7 @@ export class UserController {
 
       res.status(200).json({
         success: true,
-        message: 'User retrieved successfully',
+        message: 'User updated successfully',
         data: updatedUser,
       });
     } catch (error) {
@@ -162,7 +162,7 @@ export class UserController {
     }
   };
 
-  // GET ALL PROJECTS OF USER | GET /api/users/:id/projects
+  // GET ALL ACCEPTED PROJECTS OF USER | GET /api/users/:id/projects
   getUserProjects = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
@@ -185,7 +185,7 @@ export class UserController {
 
       res.status(200).json({
         success: true,
-        message: `Projects for user "${userDisplayName}" retrieved successfully`,
+        message: `Accepted projects for user "${userDisplayName}" retrieved successfully`,
         data: {
           user: {
             id: user.id,
@@ -202,6 +202,51 @@ export class UserController {
       res.status(500).json({
         success: false,
         message: 'Failed to retrieve user projects',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  };
+
+  // GET ALL APPLICATIONS OF USER | GET /api/users/:id/applications
+  getUserApplications = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+
+      const user = await this.userRepository.findOne({
+        where: { id },
+        relations: ['applications', 'applications.project', 'applications.project.ngo'],
+      });
+
+      if (!user) {
+        res.status(404).json({
+          success: false,
+          message: 'User not found',
+        });
+        return;
+      }
+
+      const userDisplayName =
+        user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.id;
+
+      res.status(200).json({
+        success: true,
+        message: `Applications for user "${userDisplayName}" retrieved successfully`,
+        data: {
+          user: {
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            applicationCount: user.applications.length,
+          },
+          applications: user.applications,
+        },
+        count: user.applications.length,
+      });
+    } catch (error) {
+      console.error('Error fetching user applications:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to retrieve user applications',
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
