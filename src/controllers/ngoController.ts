@@ -168,10 +168,20 @@ export class NgoController {
   getNgoProjects = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
+      const { includeStats } = req.query;
 
       const ngo = await this.ngoRepository.findOne({
         where: { id },
-        relations: ['projects'],
+        relations:
+          includeStats === 'true'
+            ? [
+                'projects',
+                'projects.applications',
+                'projects.participants',
+                'projects.skills',
+                'projects.categories',
+              ]
+            : ['projects'],
       });
 
       if (!ngo) {
@@ -182,16 +192,43 @@ export class NgoController {
         return;
       }
 
+      let projects = ngo.projects;
+
+      // If stats are requested, add them to each project
+      if (includeStats === 'true') {
+        projects = ngo.projects.map(project => {
+          const totalApplications = project.applications?.length || 0;
+          const pendingApplications =
+            project.applications?.filter(app => app.status === 'pending').length || 0;
+          const acceptedApplications =
+            project.applications?.filter(app => app.status === 'accepted').length || 0;
+          const rejectedApplications =
+            project.applications?.filter(app => app.status === 'rejected').length || 0;
+          const totalParticipants = project.participants?.length || 0;
+
+          return {
+            ...project,
+            stats: {
+              totalApplications,
+              pendingApplications,
+              acceptedApplications,
+              rejectedApplications,
+              totalParticipants,
+            },
+          };
+        });
+      }
+
       res.status(200).json({
         success: true,
-        message: `Projects for NGO "${ngo.name}" retrieved successfully`,
+        message: `Projects for NGO "${ngo.name}" retrieved successfully${includeStats === 'true' ? ' with statistics' : ''}`,
         data: {
           ngo: {
             id: ngo.id,
             name: ngo.name,
             projectCount: ngo.projects.length,
           },
-          projects: ngo.projects,
+          projects: projects,
         },
         count: ngo.projects.length,
       });
