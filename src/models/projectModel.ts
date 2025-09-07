@@ -14,6 +14,15 @@ import { Ngo } from './ngoModel';
 import { User } from './userModel';
 import { Application } from './applicationModel';
 
+// Interface for project statistics
+export interface ProjectStats {
+  totalApplications: number;
+  pendingApplications: number;
+  acceptedApplications: number;
+  rejectedApplications: number;
+  totalParticipants: number;
+}
+
 @Entity()
 export class Project {
   @PrimaryGeneratedColumn('uuid')
@@ -97,4 +106,6 @@ export class Project {
 
   @Column()
   endingAt: Date;
+
+  stats?: ProjectStats;
 }
