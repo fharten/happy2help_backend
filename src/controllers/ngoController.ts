@@ -205,14 +205,24 @@ export class NgoController {
     }
   };
 
-  // GET ALL APPLICATIONS FOR NGO | GET /api/ngos/:id/applications
-  getNgoApplications = async (req: Request, res: Response): Promise<void> => {
+  // GET ALL PROJECTS OF NGO | GET /api/ngos/:id/projects
+  getNgoProjects = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
+      const { includeStats } = req.query;
 
       const ngo = await this.ngoRepository.findOne({
         where: { id },
-        relations: ['applications', 'applications.user', 'applications.project'],
+        relations:
+          includeStats === 'true'
+            ? [
+                'projects',
+                'projects.applications',
+                'projects.participants',
+                'projects.skills',
+                'projects.categories',
+              ]
+            : ['projects'],
       });
 
       if (!ngo) {
@@ -223,28 +233,51 @@ export class NgoController {
         return;
       }
 
-      ngo.applications.sort(
-        (a, b) => new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime()
-      );
+      let projects = ngo.projects;
+
+      // If stats are requested, add them to each project
+      if (includeStats === 'true') {
+        projects = ngo.projects.map(project => {
+          const totalApplications = project.applications?.length || 0;
+          const pendingApplications =
+            project.applications?.filter(app => app.status === 'pending').length || 0;
+          const acceptedApplications =
+            project.applications?.filter(app => app.status === 'accepted').length || 0;
+          const rejectedApplications =
+            project.applications?.filter(app => app.status === 'rejected').length || 0;
+          const totalParticipants = project.participants?.length || 0;
+
+          return {
+            ...project,
+            stats: {
+              totalApplications,
+              pendingApplications,
+              acceptedApplications,
+              rejectedApplications,
+              totalParticipants,
+            },
+          };
+        });
+      }
 
       res.status(200).json({
         success: true,
-        message: `Applications for NGO "${ngo.name}" retrieved successfully`,
+        message: `Projects for NGO "${ngo.name}" retrieved successfully${includeStats === 'true' ? ' with statistics' : ''}`,
         data: {
           ngo: {
             id: ngo.id,
             name: ngo.name,
-            applicationCount: ngo.applications.length,
+            projectCount: ngo.projects.length,
           },
-          applications: ngo.applications,
+          projects: projects,
         },
-        count: ngo.applications.length,
+        count: ngo.projects.length,
       });
     } catch (error) {
-      console.error('Error fetching NGO applications:', error);
+      console.error('Error fetching NGO projects:', error);
       res.status(500).json({
         success: false,
-        message: 'Failed to retrieve NGO applications',
+        message: 'Failed to retrieve NGO projects',
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
