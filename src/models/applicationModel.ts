@@ -6,11 +6,14 @@ import {
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { ApplicationStatus } from '../types/applicationRole';
 import { User } from './userModel';
 import { Project } from './projectModel';
 import { Ngo } from './ngoModel';
+import { Skill } from './skillModel';
 
 @Entity()
 export class Application {
@@ -57,4 +60,18 @@ export class Application {
   @ManyToOne(() => Ngo, { eager: true })
   @JoinColumn({ name: 'ngoId' })
   ngo: Ngo;
+
+  @ManyToMany(() => Skill, { eager: true })
+  @JoinTable({
+    name: 'application_skills',
+    joinColumn: {
+      name: 'applicationId',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'skillId',
+      referencedColumnName: 'id',
+    },
+  })
+  skills: Skill[];
 }
