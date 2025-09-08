@@ -1,5 +1,19 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToMany,
+  JoinTable,
+} from 'typeorm';
 import { ApplicationStatus } from '../types/applicationRole';
+import { User } from './userModel';
+import { Project } from './projectModel';
+import { Ngo } from './ngoModel';
+import { Skill } from './skillModel';
 
 @Entity()
 export class Application {
@@ -21,4 +35,40 @@ export class Application {
     default: ApplicationStatus.PENDING,
   })
   status: ApplicationStatus;
+
+  @Column({ type: 'text', nullable: true })
+  message?: string;
+
+  @CreateDateColumn()
+  appliedAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  // RELATIONSHIPS
+  @ManyToOne(() => User, { eager: true })
+  @JoinColumn({ name: 'userId' })
+  user: User;
+
+  @ManyToOne(() => Project, { eager: true })
+  @JoinColumn({ name: 'projectId' })
+  project: Project;
+
+  @ManyToOne(() => Ngo, { eager: true })
+  @JoinColumn({ name: 'ngoId' })
+  ngo: Ngo;
+
+  @ManyToMany(() => Skill, { eager: true })
+  @JoinTable({
+    name: 'application_skills',
+    joinColumn: {
+      name: 'applicationId',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'skillId',
+      referencedColumnName: 'id',
+    },
+  })
+  skills: Skill[];
 }

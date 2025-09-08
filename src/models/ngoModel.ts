@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Project } from './projectModel';
+import { Application } from './applicationModel';
 
 @Entity()
 export class Ngo {
@@ -43,6 +44,10 @@ export class Ngo {
    */
   @OneToMany(() => Project, project => project.ngo)
   projects: Project[];
+
+  // APPLICATIONS FOR NGO'S PROJECTS (one-to-many)
+  @OneToMany(() => Application, application => application.ngo)
+  applications: Application[];
 
   @Column({ type: 'text', length: 255, nullable: true })
   streetAndNumber?: string;

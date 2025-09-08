@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
 import { Project } from './projectModel';
+import { Application } from './applicationModel';
 @Entity()
 export class Skill {
   @PrimaryGeneratedColumn('uuid')
@@ -13,4 +14,7 @@ export class Skill {
 
   @ManyToMany(() => Project, project => project.skills)
   projects: Project[];
+
+  @ManyToMany(() => Application, application => application.skills)
+  applications: Application[];
 }
