@@ -39,9 +39,6 @@ export class Application {
   @Column({ type: 'text', nullable: true })
   message?: string;
 
-  @Column({ type: 'text', nullable: true })
-  reviewNotes?: string;
-
   @CreateDateColumn()
   appliedAt: Date;
 
