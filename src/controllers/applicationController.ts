@@ -218,7 +218,7 @@ export class ApplicationController {
   updateApplicationStatus = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const { status, reviewNotes } = req.body;
+      const { status } = req.body;
 
       if (!status || !Object.values(ApplicationStatus).includes(status)) {
         res.status(400).json({
@@ -241,10 +241,7 @@ export class ApplicationController {
         return;
       }
 
-      await this.applicationRepository.update(id, {
-        status,
-        reviewNotes,
-      });
+      await this.applicationRepository.update(id, { status });
 
       if (status === ApplicationStatus.ACCEPTED) {
         const user = await this.userRepository.findOne({
