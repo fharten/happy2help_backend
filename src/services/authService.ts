@@ -91,6 +91,10 @@ export class AuthService {
     success: boolean;
     message: string;
     data?: any;
+<<<<<<< HEAD
+=======
+    role?: string;
+>>>>>>> 5448d90 (Initial commit — cleaned repo)
     error?: string;
   }> {
     if (!email || !password) {
@@ -101,10 +105,26 @@ export class AuthService {
     }
 
     const repository = await repositoryGetter();
+<<<<<<< HEAD
     const existingEntity = await repository.findOne({
       where: { loginEmail: email.toLowerCase() },
       select: ['id', 'loginEmail', 'password'],
     });
+=======
+    let existingEntity: User | Ngo | null = null;
+
+    if (repository.target === User) {
+      existingEntity = await (repository as Repository<User>).findOne({
+        where: { loginEmail: email.toLowerCase() },
+        select: ['id', 'loginEmail', 'password', 'role'],
+      });
+    } else {
+      existingEntity = await (repository as Repository<Ngo>).findOne({
+        where: { loginEmail: email.toLowerCase() },
+        select: ['id', 'loginEmail', 'password'],
+      });
+    }
+>>>>>>> 5448d90 (Initial commit — cleaned repo)
 
     if (!existingEntity) {
       return {
@@ -129,3 +149,16 @@ export class AuthService {
     };
   }
 }
+<<<<<<< HEAD
+=======
+
+export const jwtSecretCheck = {
+  jwtSecret: (() => {
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      throw new Error('JWT_SECRET environment variable is required');
+    }
+    return secret;
+  })(),
+};
+>>>>>>> 5448d90 (Initial commit — cleaned repo)

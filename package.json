@@ -12,6 +12,10 @@
     "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
+<<<<<<< HEAD
+=======
+    "@types/jsonwebtoken": "^9.0.10",
+>>>>>>> 5448d90 (Initial commit — cleaned repo)
     "@types/node": "^24.3.0",
     "@typescript-eslint/eslint-plugin": "^8.41.0",
     "@typescript-eslint/parser": "^8.41.0",
@@ -29,6 +33,12 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
+<<<<<<< HEAD
+=======
+    "express-rate-limit": "^8.1.0",
+    "js-cookie": "^3.0.5",
+    "jsonwebtoken": "^9.0.2",
+>>>>>>> 5448d90 (Initial commit — cleaned repo)
     "typeorm": "^0.3.26"
   },
   "repository": {
