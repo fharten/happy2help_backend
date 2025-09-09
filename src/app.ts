@@ -9,29 +9,17 @@ import { Project } from './models/projectModel';
 import { Skill } from './models/skillModel';
 import { User } from './models/userModel';
 import { Notification } from './models/notificationModel';
-<<<<<<< HEAD
-
-// Load environment variables
-=======
 import { RefreshToken } from './models/tokenModel';
 import { RevokedToken } from './models/revokedTokenModel';
 import { TokenService } from './services/tokenService';
 import { KeyManager } from './utils/keyManager';
 
 // LOAD ENV
->>>>>>> 5448d90 (Initial commit — cleaned repo)
 config();
 
 const app = express();
 const PORT = process.env.PORT || 3333;
 
-<<<<<<< HEAD
-// Database connection
-const AppDataSource = new DataSource({
-  type: 'better-sqlite3',
-  database: process.env.DATABASE_PATH || 'database.sqlite',
-  entities: [Application, Category, Ngo, Notification, Project, Skill, User], // Add your entities here
-=======
 // DB CONNECTIONS
 const AppDataSource = new DataSource({
   type: 'better-sqlite3',
@@ -47,49 +35,32 @@ const AppDataSource = new DataSource({
     RefreshToken,
     RevokedToken,
   ], // Add your entities here
->>>>>>> 5448d90 (Initial commit — cleaned repo)
   synchronize: true, // Set to false in production
   logging: false,
 });
 
-<<<<<<< HEAD
-// Middleware
-=======
 // MIDDLEWARE
->>>>>>> 5448d90 (Initial commit — cleaned repo)
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-<<<<<<< HEAD
-// Basic routes
-=======
 // BASIC ROUTES
->>>>>>> 5448d90 (Initial commit — cleaned repo)
 app.get('/', (req, res) => {
   res.json({ message: 'API is running!' });
 });
 
-<<<<<<< HEAD
-// Initialize database and start server
-const startServer = async () => {
-  AppDataSource.initialize();
-=======
 // INIT DB AND START SERVER
 const startServer = async () => {
->>>>>>> 5448d90 (Initial commit — cleaned repo)
   try {
     await AppDataSource.initialize();
     console.log('Database connected successfully');
 
-<<<<<<< HEAD
-=======
     // INIT SECURITY SSERVICES
     await KeyManager.initialize();
     await TokenService.initialize();
     console.log('Security services initialized');
 
->>>>>>> 5448d90 (Initial commit — cleaned repo)
+
     const applicationRoutes = require('./routes/applicationRoutes').default;
     const authRoutes = require('./routes/authRoutes').default;
     const ngoRoutes = require('./routes/ngoRoutes').default;

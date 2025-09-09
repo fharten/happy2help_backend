@@ -1,7 +1,5 @@
 import { Request, Response } from 'express';
 import { AuthService } from '../services/authService';
-<<<<<<< HEAD
-=======
 import { TokenService } from '../services/tokenService';
 import { BruteForceProtection } from '../middleware/rateLimiter';
 import { AuthenticatedUser, AuthenticatedNgo } from '../types/auth';
@@ -11,7 +9,6 @@ interface AuthRequest extends Request {
   ngo?: AuthenticatedNgo;
   entity?: AuthenticatedUser | AuthenticatedNgo;
 }
->>>>>>> 5448d90 (Initial commit — cleaned repo)
 
 export class AuthController {
   // CREATE USER LOGIN | POST /api/auth/user/register
@@ -23,21 +20,13 @@ export class AuthController {
         () => AuthService.getUserRepository(),
         email,
         password,
-<<<<<<< HEAD
-        'User'
-=======
         'user'
->>>>>>> 5448d90 (Initial commit — cleaned repo)
       );
 
       if (!result.success) {
         return res.status(400).json(result);
       }
 
-<<<<<<< HEAD
-      // Create user with hashed password
-=======
->>>>>>> 5448d90 (Initial commit — cleaned repo)
       const userRepository = await AuthService.getUserRepository();
       const user = userRepository.create({
         loginEmail: email.toLowerCase(),
@@ -65,10 +54,6 @@ export class AuthController {
     try {
       const { name, email, password, principal } = req.body;
 
-<<<<<<< HEAD
-      // Validate required fields
-=======
->>>>>>> 5448d90 (Initial commit — cleaned repo)
       if (!principal) {
         return res.status(400).json({
           success: false,
@@ -87,10 +72,6 @@ export class AuthController {
         return res.status(400).json(result);
       }
 
-<<<<<<< HEAD
-      // Create NGO with hashed password
-=======
->>>>>>> 5448d90 (Initial commit — cleaned repo)
       const ngoRepository = await AuthService.getNgoRepository();
       const ngo = ngoRepository.create({
         name: name,
@@ -127,11 +108,6 @@ export class AuthController {
       );
 
       if (!result.success) {
-<<<<<<< HEAD
-        return res.status(401).json(result);
-      }
-
-=======
         BruteForceProtection.recordFailure(req);
         return res.status(401).json(result);
       }
@@ -153,16 +129,11 @@ export class AuthController {
 
       BruteForceProtection.recordSuccess(req);
 
->>>>>>> 5448d90 (Initial commit — cleaned repo)
+
       res.status(200).json({
         success: true,
         message: result.message,
         data: result.data,
-<<<<<<< HEAD
-      });
-    } catch (error) {
-      console.error('Error logging in user:', error);
-=======
         accessToken,
         refreshToken,
         user: {
@@ -175,7 +146,6 @@ export class AuthController {
     } catch (error) {
       console.error('Error logging in user:', error);
       BruteForceProtection.recordFailure(req);
->>>>>>> 5448d90 (Initial commit — cleaned repo)
       res.status(500).json({
         success: false,
         message: 'Failed to login user',
@@ -196,11 +166,6 @@ export class AuthController {
       );
 
       if (!result.success) {
-<<<<<<< HEAD
-        return res.status(401).json(result);
-      }
-
-=======
         BruteForceProtection.recordFailure(req);
         return res.status(401).json(result);
       }
@@ -222,16 +187,11 @@ export class AuthController {
 
       BruteForceProtection.recordSuccess(req);
 
->>>>>>> 5448d90 (Initial commit — cleaned repo)
+
       res.status(200).json({
         success: true,
         message: result.message,
         data: result.data,
-<<<<<<< HEAD
-      });
-    } catch (error) {
-      console.error('Error logging in ngo:', error);
-=======
         accessToken,
         refreshToken,
         ngo: {
@@ -245,7 +205,6 @@ export class AuthController {
     } catch (error) {
       console.error('Error logging in ngo:', error);
       BruteForceProtection.recordFailure(req);
->>>>>>> 5448d90 (Initial commit — cleaned repo)
       res.status(500).json({
         success: false,
         message: 'Failed to login ngo',
@@ -253,8 +212,7 @@ export class AuthController {
       });
     }
   };
-<<<<<<< HEAD
-=======
+
 
   // TOKEN REFRESH | POST /api/auth/refresh
   refreshToken = async (req: Request, res: Response) => {
@@ -417,5 +375,4 @@ export class AuthController {
       });
     }
   };
->>>>>>> 5448d90 (Initial commit — cleaned repo)
 }
