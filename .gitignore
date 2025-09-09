@@ -1,10 +1,6 @@
 dist
 node_modules
-<<<<<<< HEAD
-database.sqlite
-=======
 keys
 current.json
 database.sqlite
 .env
->>>>>>> 5448d90 (Initial commit — cleaned repo)
