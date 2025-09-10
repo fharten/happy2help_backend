@@ -62,8 +62,8 @@ export class Project {
   @ManyToMany(() => Category, category => category.projects, { eager: true })
   @JoinTable({
     name: 'project_categories',
-    joinColumn: { name: 'project_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'category_id', referencedColumnName: 'id' },
+    joinColumn: { name: 'projectId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'categoryId', referencedColumnName: 'id' },
   })
   categories: Category[];
 
@@ -96,8 +96,8 @@ export class Project {
   @ManyToMany(() => Skill, skill => skill.projects, { eager: true })
   @JoinTable({
     name: 'project_skills',
-    joinColumn: { name: 'project_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'skill_id', referencedColumnName: 'id' },
+    joinColumn: { name: 'projectId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'skillId', referencedColumnName: 'id' },
   })
   skills: Skill[];
 
