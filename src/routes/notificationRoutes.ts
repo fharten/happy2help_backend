@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { NotificationController } from '../controllers/notificationController';
+import { authenticateToken, requireOwnerOrRole } from '../middleware/authMiddleware';
 
 const router = Router();
 const notificationController = new NotificationController();
@@ -8,15 +9,39 @@ const notificationController = new NotificationController();
 router.post('/', notificationController.createNotification);
 
 // GET all NOTIFICATIONs per user | /notifications/users/:userId
-router.get('/users/:userId', notificationController.getAllUserNotificationsByUserId);
+// PROTECTED: ONLY OWNER
+router.get(
+  '/users/:userId',
+  authenticateToken,
+  requireOwnerOrRole([]),
+  notificationController.getAllUserNotificationsByUserId
+);
 
 // GET all NOTIFICATIONs per NGO | /notifications/ngos/:ngoId
-router.get('/ngos/:ngoId', notificationController.getAllNgoNotificationsByNgoId);
+// PROTECTED: ONLY OWNER
+router.get(
+  '/ngos/:ngoId',
+  authenticateToken,
+  requireOwnerOrRole([]),
+  notificationController.getAllNgoNotificationsByNgoId
+);
 
 // UPDATE SINGLE NOTIFICATION | /notifications/:id
-router.put('/:id', notificationController.updateNotificationById);
+// PROTECTED: ONLY OWNER
+router.put(
+  '/:id',
+  authenticateToken,
+  requireOwnerOrRole([], 'notifications'),
+  notificationController.updateNotificationById
+);
 
 // GET SINGLE NOTIFICATION | /notifications/:id
-router.get('/:id', notificationController.getNotificationById);
+// PROTECTED: ONLY OWNER
+router.get(
+  '/:id',
+  authenticateToken,
+  requireOwnerOrRole([], 'notifications'),
+  notificationController.getNotificationById
+);
 
 export default router;

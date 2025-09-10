@@ -3,6 +3,7 @@ import { JWTService } from '../services/jwtService';
 import { AppDataSource } from '../app';
 import { Project } from '../models/projectModel';
 import { Application } from '../models/applicationModel';
+import { Notification } from '../models/notificationModel';
 
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -78,7 +79,10 @@ export const requireEntityType = (allowedTypes: Array<'user' | 'ngo'>) => {
   };
 };
 
-export const requireOwnerOrRole = (allowedRoles: string[], entityType?: 'user' | 'ngo' | 'project' | 'application') => {
+export const requireOwnerOrRole = (
+  allowedRoles: string[],
+  entityType?: 'user' | 'ngo' | 'project' | 'application' | 'notifications'
+) => {
   return async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     if (!req.user) {
       return res.status(401).json({
@@ -93,7 +97,7 @@ export const requireOwnerOrRole = (allowedRoles: string[], entityType?: 'user' |
     }
 
     const resourceId = req.params.id;
-    
+
     try {
       // If no entity type specified, assume direct ownership
       if (!entityType) {
@@ -128,9 +132,9 @@ export const requireOwnerOrRole = (allowedRoles: string[], entityType?: 'user' |
             const projectRepository = AppDataSource.getRepository(Project);
             const project = await projectRepository.findOne({
               where: { id: resourceId },
-              relations: ['ngo']
+              relations: ['ngo'],
             });
-            
+
             if (project && project.ngo.id === req.user.id) {
               return next();
             }
@@ -142,9 +146,9 @@ export const requireOwnerOrRole = (allowedRoles: string[], entityType?: 'user' |
           const applicationRepository = AppDataSource.getRepository(Application);
           const application = await applicationRepository.findOne({
             where: { id: resourceId },
-            relations: ['user', 'project', 'project.ngo']
+            relations: ['user', 'project', 'project.ngo'],
           });
-          
+
           if (application) {
             // User owns the application
             if (req.user.entityType === 'user' && application.user.id === req.user.id) {
@@ -152,6 +156,20 @@ export const requireOwnerOrRole = (allowedRoles: string[], entityType?: 'user' |
             }
             // NGO owns the project the application is for
             if (req.user.entityType === 'ngo' && application.project.ngo.id === req.user.id) {
+              return next();
+            }
+          }
+          break;
+
+        case 'notifications':
+          // Check if user ID matches notification's ngoId OR userId
+          const notificationRepository = AppDataSource.getRepository(Notification);
+          const notification = await notificationRepository.findOne({
+            where: { id: resourceId },
+          });
+
+          if (notification) {
+            if (req.user.id === notification.ngoId || req.user.id === notification.userId) {
               return next();
             }
           }
@@ -168,7 +186,6 @@ export const requireOwnerOrRole = (allowedRoles: string[], entityType?: 'user' |
         success: false,
         message: 'Access denied - must be owner or have required role',
       });
-
     } catch (error) {
       console.error('Error in requireOwnerOrRole middleware:', error);
       return res.status(500).json({
