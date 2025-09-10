@@ -7,7 +7,7 @@ const ngoController = new NgoController();
 
 // GET ALL NGOs | /ngos/
 // PROTECTED: ONLY ADMIN
-router.get('/', authenticateToken, requireRole(['adminn']), ngoController.getAllNgos);
+router.get('/', authenticateToken, requireRole(['admin']), ngoController.getAllNgos);
 
 // GET all ACTIVATED NGOs | /ngos/activated
 router.get('/activated', ngoController.getAllActivatedNgos);
