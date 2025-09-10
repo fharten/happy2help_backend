@@ -1,11 +1,13 @@
 import { Router } from 'express';
 import { NgoController } from '../controllers/ngoController';
+import { authenticateToken, requireOwnerOrRole, requireRole } from '../middleware/authMiddleware';
 
 const router = Router();
 const ngoController = new NgoController();
 
 // GET ALL NGOs | /ngos/
-router.get('/', ngoController.getAllNgos);
+// PROTECTED: ONLY ADMIN
+router.get('/', authenticateToken, requireRole(['admin']), ngoController.getAllNgos);
 
 // GET all ACTIVATED NGOs | /ngos/activated
 router.get('/activated', ngoController.getAllActivatedNgos);
@@ -17,18 +19,37 @@ router.post('/', ngoController.createNgo);
 router.get('/:id', ngoController.getNgoById);
 
 // UPDATE SINGLE NGO | /ngos/:id
-router.put('/:id', ngoController.updateNgoById);
+// PROTECTED: ONLY ADMIN & OWNER
+router.put('/:id', authenticateToken, requireOwnerOrRole(['admin']), ngoController.updateNgoById);
 
 // GET ALL PROJECTS OF NGO | /ngos/:id/projects
 router.get('/:id/projects', ngoController.getNgoProjects);
 
 // GET ALL APPLICATIONS FOR NGO | /ngos/:id/applications
-router.get('/:id/applications', ngoController.getNgoApplications);
+// PROTECTED: ONLY OWNER
+router.get(
+  '/:id/applications',
+  authenticateToken,
+  requireOwnerOrRole([]),
+  ngoController.getNgoApplications
+);
 
 // GET APPLICATIONS BY STATUS FOR NGO | /ngos/:id/applications/:status
-router.get('/:id/applications/:status', ngoController.getNgoApplicationsByStatus);
+// PROTECTED: ONLY OWNER
+router.get(
+  '/:id/applications/:status',
+  authenticateToken,
+  requireOwnerOrRole([]),
+  ngoController.getNgoApplicationsByStatus
+);
 
 // DELETE SINGLE NGO | /ngos/:id
-router.delete('/:id', ngoController.deleteNgoById);
+// PROTECTED: ONLY ADMIN & OWNER
+router.delete(
+  '/:id',
+  authenticateToken,
+  requireOwnerOrRole(['admin']),
+  ngoController.deleteNgoById
+);
 
 export default router;
