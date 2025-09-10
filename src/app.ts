@@ -16,14 +16,14 @@ import { SecurityService } from './services/securityService';
 config();
 
 const app = express();
-const PORT = process.env.PORT || 3333;
+const PORT = Number(process.env.PORT) || 3333;
 
 // DB CONNECTION
 const AppDataSource = new DataSource({
   type: 'better-sqlite3',
   database: process.env.DATABASE_PATH || 'database.sqlite',
   entities: [Application, Category, Ngo, Notification, Project, RefreshToken, Skill, User], // Add your entities here
-  synchronize: true, // Set to false in production
+  synchronize: process.env.NODE_ENV !== 'production', // SET TO FALSE IN PRODUCTION
   logging: false,
 });
 
@@ -82,7 +82,7 @@ const startServer = async () => {
     // UNCOMMENT TO ENABLE MONTHLY KEY ROTATION REMINDERS:
     // SecurityService.scheduleKeyRotation(30 * 24 * 60 * 60 * 1000); // Every 30 days
 
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`Server is running on port ${PORT}`);
       console.log('JWT security features enabled');
     });
