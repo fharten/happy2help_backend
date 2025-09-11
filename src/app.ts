@@ -9,39 +9,33 @@ import { Project } from './models/projectModel';
 import { Skill } from './models/skillModel';
 import { User } from './models/userModel';
 import { Notification } from './models/notificationModel';
-import { RefreshToken } from './models/refreshTokenModel';
-import { SecurityService } from './services/securityService';
 
-// LOAD ENV
+// Load environment variables
 config();
 
 const app = express();
-const PORT = Number(process.env.PORT) || 3333;
+const PORT = process.env.PORT || 3333;
 
-// DB CONNECTION
+// Database connection
 const AppDataSource = new DataSource({
   type: 'better-sqlite3',
   database: process.env.DATABASE_PATH || 'database.sqlite',
-  entities: [Application, Category, Ngo, Notification, Project, RefreshToken, Skill, User], // Add your entities here
-  synchronize: process.env.NODE_ENV !== 'production', // SET TO FALSE IN PRODUCTION
+  entities: [Application, Category, Ngo, Notification, Project, Skill, User], // Add your entities here
+  synchronize: true, // Set to false in production
   logging: false,
 });
 
-// MIDDLEWARE
-const corsOptions = {
-  origin: process.env.TRUSTED_ORIGINS ? process.env.TRUSTED_ORIGINS.split(',') : true,
-  credentials: true,
-};
-app.use(cors(corsOptions));
+// Middleware
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// BASIC ROUTED
+// Basic routes
 app.get('/', (req, res) => {
   res.json({ message: 'API is running!' });
 });
 
-// INITIALIZE DB AND START SERVER
+// Initialize database and start server
 const startServer = async () => {
   AppDataSource.initialize();
   try {
@@ -55,6 +49,7 @@ const startServer = async () => {
     const projectRoutes = require('./routes/projectRoutes').default;
     const skillRoutes = require('./routes/skillRoutes').default;
     const userRoutes = require('./routes/userRoutes').default;
+    const categoryRoutes = require('./routes/categoryRoutes').default;
 
     app.use('/api/applications', applicationRoutes);
     app.use('/api/auth', authRoutes);
@@ -63,28 +58,10 @@ const startServer = async () => {
     app.use('/api/projects', projectRoutes);
     app.use('/api/skills', skillRoutes);
     app.use('/api/users', userRoutes);
+    app.use('/api/categories', categoryRoutes);
 
-    // VALIDATE SECURITY SETTINGS
-    const securityValidation = SecurityService.validateSecuritySettings();
-    if (!securityValidation.isValid) {
-      console.error('Security configuration errors:');
-      securityValidation.errors.forEach(error => console.error(`  - ${error}`));
-      process.exit(1);
-    }
-
-    if (securityValidation.warnings.length > 0) {
-      console.warn('Security configuration warnings:');
-      securityValidation.warnings.forEach(warning => console.warn(`  - ${warning}`));
-    }
-
-    // START SECURITY SERVICES
-    SecurityService.startTokenCleanup(3600000); // Every hour
-    // UNCOMMENT TO ENABLE MONTHLY KEY ROTATION REMINDERS:
-    // SecurityService.scheduleKeyRotation(30 * 24 * 60 * 60 * 1000); // Every 30 days
-
-    app.listen(PORT, '0.0.0.0', () => {
+    app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
-      console.log('JWT security features enabled');
     });
   } catch (error) {
     console.error('Error starting server:', error);
