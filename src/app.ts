@@ -9,33 +9,39 @@ import { Project } from './models/projectModel';
 import { Skill } from './models/skillModel';
 import { User } from './models/userModel';
 import { Notification } from './models/notificationModel';
+import { RefreshToken } from './models/refreshTokenModel';
+import { SecurityService } from './services/securityService';
 
-// Load environment variables
+// LOAD ENV
 config();
 
 const app = express();
-const PORT = process.env.PORT || 3333;
+const PORT = Number(process.env.PORT) || 3333;
 
-// Database connection
+// DB CONNECTION
 const AppDataSource = new DataSource({
   type: 'better-sqlite3',
   database: process.env.DATABASE_PATH || 'database.sqlite',
-  entities: [Application, Category, Ngo, Notification, Project, Skill, User], // Add your entities here
-  synchronize: true, // Set to false in production
+  entities: [Application, Category, Ngo, Notification, Project, RefreshToken, Skill, User], // Add your entities here
+  synchronize: process.env.NODE_ENV !== 'production', // SET TO FALSE IN PRODUCTION
   logging: false,
 });
 
-// Middleware
-app.use(cors());
+// MIDDLEWARE
+const corsOptions = {
+  origin: process.env.TRUSTED_ORIGINS ? process.env.TRUSTED_ORIGINS.split(',') : true,
+  credentials: true,
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Basic routes
+// BASIC ROUTED
 app.get('/', (req, res) => {
   res.json({ message: 'API is running!' });
 });
 
-// Initialize database and start server
+// INITIALIZE DB AND START SERVER
 const startServer = async () => {
   AppDataSource.initialize();
   try {
@@ -60,8 +66,27 @@ const startServer = async () => {
     app.use('/api/users', userRoutes);
     app.use('/api/categories', categoryRoutes);
 
-    app.listen(PORT, () => {
+    // VALIDATE SECURITY SETTINGS
+    const securityValidation = SecurityService.validateSecuritySettings();
+    if (!securityValidation.isValid) {
+      console.error('Security configuration errors:');
+      securityValidation.errors.forEach(error => console.error(`  - ${error}`));
+      process.exit(1);
+    }
+
+    if (securityValidation.warnings.length > 0) {
+      console.warn('Security configuration warnings:');
+      securityValidation.warnings.forEach(warning => console.warn(`  - ${warning}`));
+    }
+
+    // START SECURITY SERVICES
+    SecurityService.startTokenCleanup(3600000); // Every hour
+    // UNCOMMENT TO ENABLE MONTHLY KEY ROTATION REMINDERS:
+    // SecurityService.scheduleKeyRotation(30 * 24 * 60 * 60 * 1000); // Every 30 days
+
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`Server is running on port ${PORT}`);
+      console.log('JWT security features enabled');
     });
   } catch (error) {
     console.error('Error starting server:', error);
