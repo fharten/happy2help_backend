@@ -17,8 +17,8 @@ export class CategoryController {
       const whereConditions: any = { projectId };
 
       const categories = await this.categoryRepository.find({
-        where: whereConditions,
-        relations: ['project'],
+        where: { projects: { id: projectId } },
+        relations: ['projects'],
       });
 
       res.status(200).json({
