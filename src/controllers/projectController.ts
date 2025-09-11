@@ -349,4 +349,40 @@ export class ProjectController {
       });
     }
   };
+
+  // GET ALL CATEGORIES FOR PROJECT | GET /api/projects/:id/categories
+  getAllCategoriesByProjectId = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+
+      const project = await this.projectRepository.findOne({
+        where: { id },
+        relations: ['categories'],
+      });
+
+      if (!project) {
+        res.status(404).json({
+          success: false,
+          message: 'Project not found',
+        });
+        return;
+      }
+
+      const categories = project.categories || [];
+
+      res.status(200).json({
+        success: true,
+        message: `Categories for project "${project.name}" retrieved successfully`,
+        data: categories,
+        count: categories.length,
+      });
+    } catch (error) {
+      console.error('Error fetching project categories:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to retrieve project categories',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  };
 }

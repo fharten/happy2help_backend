@@ -55,6 +55,7 @@ const startServer = async () => {
     const projectRoutes = require('./routes/projectRoutes').default;
     const skillRoutes = require('./routes/skillRoutes').default;
     const userRoutes = require('./routes/userRoutes').default;
+    const categoryRoutes = require('./routes/categoryRoutes').default;
 
     app.use('/api/applications', applicationRoutes);
     app.use('/api/auth', authRoutes);
@@ -63,6 +64,7 @@ const startServer = async () => {
     app.use('/api/projects', projectRoutes);
     app.use('/api/skills', skillRoutes);
     app.use('/api/users', userRoutes);
+    app.use('/api/categories', categoryRoutes);
 
     // VALIDATE SECURITY SETTINGS
     const securityValidation = SecurityService.validateSecuritySettings();
