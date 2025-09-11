@@ -7,7 +7,4 @@ const categoryController = new CategoryController();
 // GET ALL CATEGORIES | /categories
 router.get('/', categoryController.getAllCategories);
 
-// GET ALL CATEGORIES OF A PROJECT | /categories/projects/:id
-router.get('/project/:projectId', categoryController.getAllCategoriesByProjectId);
-
 export default router;
