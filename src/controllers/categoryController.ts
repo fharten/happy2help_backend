@@ -14,8 +14,6 @@ export class CategoryController {
     try {
       const { projectId } = req.params;
 
-      const whereConditions: any = { projectId };
-
       const categories = await this.categoryRepository.find({
         where: { projects: { id: projectId } },
         relations: ['projects'],
