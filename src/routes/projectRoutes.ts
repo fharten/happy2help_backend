@@ -67,4 +67,7 @@ router.delete(
   projectController.deleteProjectById
 );
 
+// GET ALL CATEGORIES FOR PROJECT | /projects/:id/categories
+router.get('/:id/categories', projectController.getAllCategoriesByProjectId);
+
 export default router;
