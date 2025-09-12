@@ -141,7 +141,10 @@ export class ProjectController {
       const { id } = req.params;
       const projectUpdate = req.body;
 
-      const existingProject = await this.projectRepository.findOne({ where: { id } });
+      const existingProject = await this.projectRepository.findOne({
+        where: { id },
+        relations: ['ngo', 'skills', 'categories'],
+      });
 
       if (!existingProject) {
         res.status(404).json({
@@ -151,11 +154,30 @@ export class ProjectController {
         return;
       }
 
-      await this.projectRepository.update(id, projectUpdate);
+      const { skills, categories, ...projectTableFields } = projectUpdate as {
+        skills?: Array<string | { id: string }>;
+        categories?: Array<string | { id: string }>;
+        [key: string]: any;
+      };
+
+      Object.assign(existingProject, projectTableFields);
+
+      if (Array.isArray(skills)) {
+        existingProject.skills = skills
+          .map(skill => (typeof skill === 'string' ? { id: skill } : skill))
+          .filter(Boolean) as any;
+      }
+      if (Array.isArray(categories)) {
+        existingProject.categories = categories
+          .map(category => (typeof category === 'string' ? { id: category } : category))
+          .filter(Boolean) as any;
+      }
+
+      const savedProject = await this.projectRepository.save(existingProject);
 
       const updatedProject = await this.projectRepository.findOne({
-        where: { id },
-        relations: ['ngo'],
+        where: { id: savedProject.id },
+        relations: ['ngo', 'skills', 'categories'],
       });
 
       res.status(200).json({
