@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import { AppDataSource } from '../app';
 import { Project } from '../models/projectModel';
+import { Category } from '../models/categoryModel';
+import { Skill } from '../models/skillModel';
 
 export class ProjectController {
   public projectRepository = AppDataSource.getRepository(Project);
@@ -165,12 +167,12 @@ export class ProjectController {
       if (Array.isArray(skills)) {
         existingProject.skills = skills
           .map(skill => (typeof skill === 'string' ? { id: skill } : skill))
-          .filter(Boolean) as any;
+          .filter(Boolean) as Skill[];
       }
       if (Array.isArray(categories)) {
         existingProject.categories = categories
           .map(category => (typeof category === 'string' ? { id: category } : category))
-          .filter(Boolean) as any;
+          .filter(Boolean) as Category[];
       }
 
       const savedProject = await this.projectRepository.save(existingProject);
