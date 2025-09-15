@@ -22,8 +22,13 @@ router.get(
 router.post('/', userController.createUser);
 
 // GET SINGLE USER | /users/:id
-// PROTECTED: ONLY ADMIN & NGO
-router.get('/:id', authenticateToken, requireRole(['admin', 'ngo']), userController.getUserById);
+// PROTECTED: ONLY ADMIN & NGO & OWNER
+router.get(
+  '/:id',
+  authenticateToken,
+  requireOwnerOrRole(['admin', 'ngo']),
+  userController.getUserById
+);
 
 // UPDATE SINGLE USER | /users/:id
 // PROTECTED: ONLY ADMIN & OWNER
