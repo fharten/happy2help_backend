@@ -94,7 +94,7 @@ export class AuthController {
   loginUser = async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body;
-      const ipAddress = req.ip || req.connection.remoteAddress;
+      const ipAddress = req.ip || req.socket.remoteAddress;
       const userAgent = req.get('User-Agent');
 
       const result = await AuthService.loginEntity(
@@ -129,7 +129,7 @@ export class AuthController {
   loginNgo = async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body;
-      const ipAddress = req.ip || req.connection.remoteAddress;
+      const ipAddress = req.ip || req.socket.remoteAddress;
       const userAgent = req.get('User-Agent');
 
       const result = await AuthService.loginEntity(

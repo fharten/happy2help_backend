@@ -125,7 +125,17 @@ export class AuthService {
     const repository = await this.getUserRepository();
     const user = await repository.findOne({
       where: { loginEmail: email.toLowerCase() },
-      select: ['id', 'loginEmail', 'password', 'role', 'isDisabled'],
+      select: [
+        'id',
+        'loginEmail',
+        'password',
+        'role',
+        'isDisabled',
+        'firstName',
+        'lastName',
+        'image',
+        'skills',
+      ],
     });
 
     if (!user) {
@@ -194,7 +204,7 @@ export class AuthService {
     const repository = await this.getNgoRepository();
     const ngo = await repository.findOne({
       where: { loginEmail: email.toLowerCase() },
-      select: ['id', 'loginEmail', 'password', 'isDisabled'],
+      select: ['id', 'loginEmail', 'password', 'isDisabled', 'name', 'principal', 'image'],
     });
 
     if (!ngo) {
