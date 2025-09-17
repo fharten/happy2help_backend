@@ -5,6 +5,7 @@ import {
   requireEntityType,
   requireOwnerOrRole,
 } from '../middleware/authMiddleware';
+import { uploadMultipleImages } from '../middleware/uploadMiddleware';
 
 const router = Router();
 const projectController = new ProjectController();
@@ -69,5 +70,37 @@ router.delete(
 
 // GET ALL CATEGORIES FOR PROJECT | /projects/:id/categories
 router.get('/:id/categories', projectController.getAllCategoriesByProjectId);
+
+// UPLOAD PROJECT IMAGES | /projects/:id/images
+// PROTECTED: ONLY ADMIN & OWNER
+router.post(
+  '/:id/images',
+  authenticateToken,
+  requireOwnerOrRole(['admin'], 'project'),
+  (req, res, next) => {
+    req.params.type = 'projects';
+    next();
+  },
+  uploadMultipleImages,
+  projectController.uploadProjectImages
+);
+
+// DELETE PROJECT IMAGE BY INDEX | /projects/:id/images/:imageIndex
+// PROTECTED: ONLY ADMIN & OWNER
+router.delete(
+  '/:id/images/:imageIndex',
+  authenticateToken,
+  requireOwnerOrRole(['admin'], 'project'),
+  projectController.deleteProjectImage
+);
+
+// DELETE ALL PROJECT IMAGES | /projects/:id/images
+// PROTECTED: ONLY ADMIN & OWNER
+router.delete(
+  '/:id/images',
+  authenticateToken,
+  requireOwnerOrRole(['admin'], 'project'),
+  projectController.deleteAllProjectImages
+);
 
 export default router;

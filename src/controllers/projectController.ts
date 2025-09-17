@@ -3,6 +3,7 @@ import { AppDataSource } from '../app';
 import { Project } from '../models/projectModel';
 import { Category } from '../models/categoryModel';
 import { Skill } from '../models/skillModel';
+import { getImageUrl, deleteImageFile, getFilePathFromUrl } from '../middleware/uploadMiddleware';
 
 export class ProjectController {
   public projectRepository = AppDataSource.getRepository(Project);
@@ -405,6 +406,169 @@ export class ProjectController {
       res.status(500).json({
         success: false,
         message: 'Failed to retrieve project categories',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  };
+
+  // UPLOAD PROJECT IMAGES | POST /api/projects/:id/images
+  uploadProjectImages = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+
+      if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
+        res.status(400).json({
+          success: false,
+          message: 'No image files uploaded',
+        });
+        return;
+      }
+
+      const project = await this.projectRepository.findOne({ where: { id } });
+
+      if (!project) {
+        res.status(404).json({
+          success: false,
+          message: 'Project not found',
+        });
+        return;
+      }
+
+      // GENERATE URLS FOR NEW IMAGES
+      const newImageUrls = req.files.map((file: Express.Multer.File) =>
+        getImageUrl(file.filename, 'projects')
+      );
+
+      // ADD NEW IMAGES TO EXISTING ARRAY
+      const currentImages = project.images || [];
+      project.images = [...currentImages, ...newImageUrls];
+
+      await this.projectRepository.save(project);
+
+      res.status(200).json({
+        success: true,
+        message: 'Project images uploaded successfully',
+        data: {
+          id: project.id,
+          images: project.images,
+          newImages: newImageUrls,
+        },
+      });
+    } catch (error) {
+      console.error('Error uploading project images:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to upload project images',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  };
+
+  // DELETE PROJECT IMAGE | DELETE /api/projects/:id/images/:imageIndex
+  deleteProjectImage = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id, imageIndex } = req.params;
+      const index = parseInt(imageIndex);
+
+      if (isNaN(index)) {
+        res.status(400).json({
+          success: false,
+          message: 'Invalid image index',
+        });
+        return;
+      }
+
+      const project = await this.projectRepository.findOne({ where: { id } });
+
+      if (!project) {
+        res.status(404).json({
+          success: false,
+          message: 'Project not found',
+        });
+        return;
+      }
+
+      if (!project.images || project.images.length === 0) {
+        res.status(400).json({
+          success: false,
+          message: 'Project has no images to delete',
+        });
+        return;
+      }
+
+      if (index < 0 || index >= project.images.length) {
+        res.status(400).json({
+          success: false,
+          message: 'Image index out of range',
+        });
+        return;
+      }
+
+      // DELETE THE IMAGE FILE
+      const imageUrl = project.images[index];
+      try {
+        const imagePath = getFilePathFromUrl(imageUrl);
+        deleteImageFile(imagePath);
+      } catch (error) {
+        console.error('Error deleting project image file:', error);
+      }
+
+      // REMOVE THE IMAGE URL FROM THE ARRAY
+      project.images.splice(index, 1);
+      await this.projectRepository.save(project);
+
+      res.status(204).end();
+    } catch (error) {
+      console.error('Error deleting project image:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to delete project image',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  };
+
+  // DELETE ALL PROJECT IMAGES | DELETE /api/projects/:id/images
+  deleteAllProjectImages = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+
+      const project = await this.projectRepository.findOne({ where: { id } });
+
+      if (!project) {
+        res.status(404).json({
+          success: false,
+          message: 'Project not found',
+        });
+        return;
+      }
+
+      if (!project.images || project.images.length === 0) {
+        res.status(400).json({
+          success: false,
+          message: 'Project has no images to delete',
+        });
+        return;
+      }
+
+      // DELETE ALL IMAGE FILES
+      project.images.forEach(imageUrl => {
+        try {
+          const imagePath = getFilePathFromUrl(imageUrl);
+          deleteImageFile(imagePath);
+        } catch (error) {
+          console.error('Error deleting project image file:', error);
+        }
+      });
+
+      await this.projectRepository.save(project);
+
+      res.status(204).end();
+    } catch (error) {
+      console.error('Error deleting all project images:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to delete all project images',
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
