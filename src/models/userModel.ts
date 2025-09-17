@@ -13,6 +13,7 @@ import * as bcrypt from 'bcrypt';
 import { UserRole } from '../types/userRole';
 import { Project } from './projectModel';
 import { Application } from './applicationModel';
+import { Skill } from './skillModel';
 
 @Entity()
 export class User {
@@ -40,15 +41,14 @@ export class User {
   @Column({ type: 'text', length: 200, nullable: true })
   phone?: string;
 
-  @Column({
-    type: 'text',
-    transformer: {
-      to: (value: string[]) => JSON.stringify(value),
-      from: (value: string) => JSON.parse(value || '[]'),
-    },
-    nullable: true,
+  // SKILLS (many-to-many relationship)
+  @ManyToMany(() => Skill, { eager: true })
+  @JoinTable({
+    name: 'user_skills',
+    joinColumn: { name: 'userId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'skillId', referencedColumnName: 'id' },
   })
-  skills?: string[];
+  skills?: Skill[];
 
   @Column({
     type: 'varchar',

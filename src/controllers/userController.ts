@@ -2,9 +2,11 @@ import { Request, Response } from 'express';
 import { AppDataSource } from '../app';
 import { User } from '../models/userModel';
 import { getImageUrl, deleteImageFile, getFilePathFromUrl } from '../middleware/uploadMiddleware';
+import { Skill } from '../models/skillModel';
 
 export class UserController {
   public userRepository = AppDataSource.getRepository(User);
+  public skillRepository = AppDataSource.getRepository(Skill);
 
   // GET ALL USERS | GET /api/users
   getAllUsers = async (req: Request, res: Response): Promise<void> => {
@@ -108,8 +110,12 @@ export class UserController {
   updateUserById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const userUpdate = req.body;
-      const existingUser = await this.userRepository.findOne({ where: { id } });
+      const { skills: skillIds, ...userUpdate } = req.body;
+
+      const existingUser = await this.userRepository.findOne({
+        where: { id },
+        relations: ['skills'],
+      });
 
       if (!existingUser) {
         res.status(404).json({
@@ -119,13 +125,25 @@ export class UserController {
         return;
       }
 
-      await this.userRepository.update(id, userUpdate);
-      const updatedUser = await this.userRepository.findOne({ where: { id } });
+      // Update the existingUser object with new data
+      Object.assign(existingUser, userUpdate);
+
+      // Handle skills update if provided
+      if (skillIds !== undefined) {
+        let skills: Skill[] = [];
+        if (Array.isArray(skillIds) && skillIds.length > 0) {
+          skills = await this.skillRepository.findByIds(skillIds);
+        }
+        existingUser.skills = skills;
+      }
+
+      // Save everything at once
+      const savedUser = await this.userRepository.save(existingUser);
 
       res.status(200).json({
         success: true,
         message: 'User updated successfully',
-        data: updatedUser,
+        data: savedUser,
       });
     } catch (error) {
       console.error('Error updating user:', error);
