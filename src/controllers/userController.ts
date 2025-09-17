@@ -342,18 +342,11 @@ export class UserController {
         console.error('Error deleting user image file:', error);
       }
 
-      // REMOVE IMAGE URL FROM NGO
+      // REMOVE IMAGE URL FROM USER
       user.image = undefined;
       await this.userRepository.save(user);
 
-      res.status(200).json({
-        success: true,
-        message: 'User profile image deleted successfully',
-        data: {
-          id: user.id,
-          image: null,
-        },
-      });
+      res.status(204).end();
     } catch (error) {
       console.error('Error deleting user image:', error);
       res.status(500).json({

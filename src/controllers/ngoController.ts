@@ -430,14 +430,7 @@ export class NgoController {
       ngo.image = undefined;
       await this.ngoRepository.save(ngo);
 
-      res.status(200).json({
-        success: true,
-        message: 'NGO profile image deleted successfully',
-        data: {
-          id: ngo.id,
-          image: null,
-        },
-      });
+      res.status(204).end();
     } catch (error) {
       console.error('Error deleting NGO image:', error);
       res.status(500).json({
