@@ -1,5 +1,6 @@
 import cors from 'cors';
 import express from 'express';
+import path from 'path';
 import { config } from 'dotenv';
 import { DataSource } from 'typeorm';
 import { Ngo } from './models/ngoModel';
@@ -36,10 +37,23 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// STATIC FILE SERVING FOR UPLOADS
+const uploadsPath = process.env.NODE_ENV === 'production'
+  ? '/home/fh/uploads'
+  : path.join(process.cwd(), 'uploads');
+app.use('/uploads', express.static(uploadsPath));
+
 // BASIC ROUTED
 app.get('/', (req, res) => {
   res.json({ message: 'API is running!' });
 });
+
+// SERVE TEST UPLOAD PAGE (development only)
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/test-upload', (req, res) => {
+    res.sendFile(path.join(process.cwd(), 'test-upload.html'));
+  });
+}
 
 // INITIALIZE DB AND START SERVER
 const startServer = async () => {

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { NgoController } from '../controllers/ngoController';
 import { authenticateToken, requireOwnerOrRole, requireRole } from '../middleware/authMiddleware';
+import { uploadSingleImage } from '../middleware/uploadMiddleware';
 
 const router = Router();
 const ngoController = new NgoController();
@@ -50,6 +51,29 @@ router.delete(
   authenticateToken,
   requireOwnerOrRole(['admin']),
   ngoController.deleteNgoById
+);
+
+// UPLOAD NGO PROFILE IMAGE | /ngos/:id/image
+// PROTECTED: ONLY ADMIN & OWNER
+router.post(
+  '/:id/image',
+  authenticateToken,
+  requireOwnerOrRole(['admin']),
+  (req, res, next) => {
+    req.params.type = 'ngos';
+    next();
+  },
+  uploadSingleImage,
+  ngoController.uploadNgoImage
+);
+
+// DELETE NGO PROFILE IMAGE | /ngos/:id/image
+// PROTECTED: ONLY ADMIN & OWNER
+router.delete(
+  '/:id/image',
+  authenticateToken,
+  requireOwnerOrRole(['admin']),
+  ngoController.deleteNgoImage
 );
 
 export default router;

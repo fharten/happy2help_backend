@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { UserController } from '../controllers/userController';
 import { authenticateToken, requireRole, requireOwnerOrRole } from '../middleware/authMiddleware';
+import { uploadSingleImage } from '../middleware/uploadMiddleware';
 
 const router = Router();
 const userController = new UserController();
@@ -59,6 +60,29 @@ router.delete(
   authenticateToken,
   requireOwnerOrRole(['admin']),
   userController.deleteUserById
+);
+
+// UPLOAD USER PROFILE IMAGE | /users/:id/image
+// PROTECTED: ONLY ADMIN & OWNER
+router.post(
+  '/:id/image',
+  authenticateToken,
+  requireOwnerOrRole(['admin']),
+  (req, res, next) => {
+    req.params.type = 'users';
+    next();
+  },
+  uploadSingleImage,
+  userController.uploadUserImage
+);
+
+// DELETE USER PROFILE IMAGE | /users/:id/image
+// PROTECTED: ONLY ADMIN & OWNER
+router.delete(
+  '/:id/image',
+  authenticateToken,
+  requireOwnerOrRole(['admin']),
+  userController.deleteUserImage
 );
 
 export default router;
