@@ -517,15 +517,7 @@ export class ProjectController {
       project.images.splice(index, 1);
       await this.projectRepository.save(project);
 
-      res.status(200).json({
-        success: true,
-        message: 'Project image deleted successfully',
-        data: {
-          id: project.id,
-          images: project.images,
-          deletedImageUrl: imageUrl,
-        },
-      });
+      res.status(204).end();
     } catch (error) {
       console.error('Error deleting project image:', error);
       res.status(500).json({
@@ -569,19 +561,9 @@ export class ProjectController {
         }
       });
 
-      const deletedImages = [...project.images];
-      project.images = [];
       await this.projectRepository.save(project);
 
-      res.status(200).json({
-        success: true,
-        message: 'All project images deleted successfully',
-        data: {
-          id: project.id,
-          images: [],
-          deletedImages: deletedImages,
-        },
-      });
+      res.status(204).end();
     } catch (error) {
       console.error('Error deleting all project images:', error);
       res.status(500).json({
