@@ -25,9 +25,10 @@ const seedData = async () => {
       console.log('Clearing existing data...');
       await applicationRepository.clear();
       await manager.query('DELETE FROM user_projects');
+      await manager.query('DELETE FROM user_skills'); // Clear user-skills junction table
       await manager.query('DELETE FROM project_skills');
       await manager.query('DELETE FROM project_categories');
-      await manager.query('DELETE FROM application_skills'); // Clear application-skills junction table
+      await manager.query('DELETE FROM application_skills');
       await projectRepository.clear();
       await userRepository.clear();
       await ngoRepository.clear();
@@ -69,14 +70,14 @@ const seedData = async () => {
         categoriesData.map(c => categoryRepository.create(c))
       );
 
-      // 10 Users
+      // 10 Users with proper skill relationships
       const usersData = Array.from({ length: 10 }).map((_, i) => ({
         firstName: `User${i + 1}`,
         lastName: `Lastname${i + 1}`,
         loginEmail: `user${i + 1}@example.com`,
         password: hashedPassword,
+        image: 'http://localhost:3333/uploads/users/588434aa-41b2-4319-9d2f-c72ca1c8d0ee.png',
         role: i === 0 ? UserRole.ADMIN : UserRole.USER,
-        skills: skills.slice(i % 10, (i % 10) + 3).map(s => s.name),
         yearOfBirth: 1980 + i,
         zipCode: 10000 + i,
         city: `City${i + 1}`,
@@ -84,7 +85,16 @@ const seedData = async () => {
         isActivated: true,
         isDisabled: false,
       }));
+
       const users = await userRepository.save(usersData.map(u => userRepository.create(u)));
+
+      // Assign skills to users (proper many-to-many relationships)
+      for (let i = 0; i < users.length; i++) {
+        const user = users[i];
+        const userSkills = skills.slice(i % 10, (i % 10) + 3); // Each user gets 3 skills
+        user.skills = userSkills;
+        await userRepository.save(user);
+      }
 
       // 10 NGOs
       const ngosData = Array.from({ length: 10 }).map((_, i) => ({
@@ -93,6 +103,7 @@ const seedData = async () => {
         industry: [categories[i % 10].name],
         streetAndNumber: `Street ${i + 1}`,
         zipCode: 10000 + i,
+        image: 'http://localhost:3333/uploads/ngos/bd3f08bd-a642-4b77-becf-4f4dbdea6e1a.png',
         city: `City${i + 1}`,
         state: `State${i + 1}`,
         principal: `Principal ${i + 1}`,
@@ -107,8 +118,12 @@ const seedData = async () => {
       // 10 Projects
       const projectsData = Array.from({ length: 10 }).map((_, i) => ({
         name: `Project ${i + 1}`,
-        description: `Description for project ${i + 1}`,
-        images: [`project${i + 1}_img1.jpg`],
+        description: `Description for project ${i + 1}. This is a detailed description that explains what this project is about and what volunteers will be doing. It contains at least 50 characters to meet validation requirements.`,
+        images: [
+          'http://localhost:3333/uploads/projects/71bb6806-2568-4734-9022-9509adb0ec27.png',
+          'http://localhost:3333/uploads/projects/18055f58-7241-43f7-9469-80592cceb096.png',
+          'http://localhost:3333/uploads/projects/860032a2-1d09-496d-892c-63a8b4364fe3.png',
+        ],
         categories: [categories[i % 10]],
         ngoId: ngos[i % 10].id,
         ngo: ngos[i % 10],
@@ -126,15 +141,15 @@ const seedData = async () => {
         projectsData.map(p => projectRepository.create(p))
       );
 
-      // Assign participants
-      projects.forEach((project, i) => {
+      // Assign participants to projects
+      for (let i = 0; i < projects.length; i++) {
+        const project = projects[i];
         project.participants = [users[i]];
-      });
-      await Promise.all(projects.map(p => projectRepository.save(p)));
+        await projectRepository.save(project);
+      }
 
       // 10 Applications with Skills
       const applicationsData = projects.map((project, i) => {
-        // Create application with basic data
         const applicationData = {
           projectId: project.id,
           userId: users[i].id,
@@ -148,7 +163,6 @@ const seedData = async () => {
           message: `Application message for ${project.name}`,
         };
 
-        // Add skills to each application (1-3 skills from the project's required skills)
         const projectSkills = project.skills || [];
         const numSkillsToAdd = Math.min(
           projectSkills.length,
@@ -162,7 +176,7 @@ const seedData = async () => {
         };
       });
 
-      // Save applications and their skills
+      // Save applications with their skills
       for (const appData of applicationsData) {
         const { skills: appSkills, ...applicationWithoutSkills } = appData;
         const application = applicationRepository.create(applicationWithoutSkills);
@@ -173,10 +187,20 @@ const seedData = async () => {
       console.log('Seeding completed successfully!');
       console.log(`✅ Created ${skills.length} skills`);
       console.log(`✅ Created ${categories.length} categories`);
-      console.log(`✅ Created ${users.length} users`);
+      console.log(`✅ Created ${users.length} users with skills`);
       console.log(`✅ Created ${ngos.length} NGOs`);
       console.log(`✅ Created ${projects.length} projects`);
       console.log(`✅ Created ${applicationsData.length} applications with skills`);
+
+      // Log some sample data to verify relationships
+      const sampleUser = await userRepository.findOne({
+        where: { id: users[0].id },
+        relations: ['skills'],
+      });
+      console.log(
+        `👤 Sample user ${sampleUser?.firstName} has ${sampleUser?.skills?.length} skills:`,
+        sampleUser?.skills?.map(s => s.name)
+      );
     });
   } catch (error) {
     console.error('Error seeding database:', error);
