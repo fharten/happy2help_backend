@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { AppDataSource } from '../app';
 import { Ngo } from '../models/ngoModel';
+import { getImageUrl, deleteImageFile, getFilePathFromUrl } from '../middleware/uploadMiddleware';
 
 export class NgoController {
   public ngoRepository = AppDataSource.getRepository(Ngo);
@@ -331,6 +332,117 @@ export class NgoController {
       res.status(500).json({
         success: false,
         message: 'Failed to retrieve NGO applications',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  };
+
+  // UPLOAD NGO PROFILE IMAGE | POST /api/ngos/:id/image
+  uploadNgoImage = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+
+      if (!req.file) {
+        res.status(400).json({
+          success: false,
+          message: 'No image file uploaded',
+        });
+        return;
+      }
+
+      const ngo = await this.ngoRepository.findOne({ where: { id } });
+
+      if (!ngo) {
+        res.status(404).json({
+          success: false,
+          message: 'NGO not found',
+        });
+        return;
+      }
+
+      // DELETE OLD IMAGE IF EXISTS
+      if (ngo.image) {
+        try {
+          const oldImagePath = getFilePathFromUrl(ngo.image);
+          deleteImageFile(oldImagePath);
+        } catch (error) {
+          console.error('Error deleting old NGO image:', error);
+        }
+      }
+
+      // GENERATE NEW IMAGE URL
+      const imageUrl = getImageUrl(req.file.filename, 'ngos');
+
+      // UPDATE NGO WITH NEW IMAGE URL
+      ngo.image = imageUrl;
+      await this.ngoRepository.save(ngo);
+
+      res.status(200).json({
+        success: true,
+        message: 'NGO profile image uploaded successfully',
+        data: {
+          id: ngo.id,
+          image: ngo.image,
+        },
+      });
+    } catch (error) {
+      console.error('Error uploading NGO image:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to upload NGO image',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  };
+
+  // DELETE NGO PROFILE IMAGE | DELETE /api/ngos/:id/image
+  deleteNgoImage = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+
+      const ngo = await this.ngoRepository.findOne({ where: { id } });
+
+      if (!ngo) {
+        res.status(404).json({
+          success: false,
+          message: 'NGO not found',
+        });
+        return;
+      }
+
+      if (!ngo.image) {
+        res.status(400).json({
+          success: false,
+          message: 'NGO has no profile image to delete',
+        });
+        return;
+      }
+
+      // DELETE IMAGE FILE
+      try {
+        const imagePath = getFilePathFromUrl(ngo.image);
+        deleteImageFile(imagePath);
+      } catch (error) {
+        console.error('Error deleting NGO image file:', error);
+      }
+
+      // REMOVE IMAGE URL FROM NGO
+      ngo.image = undefined;
+      await this.ngoRepository.save(ngo);
+
+      res.status(200).json({
+        success: true,
+        message: 'NGO profile image deleted successfully',
+        data: {
+          id: ngo.id,
+          image: null,
+        },
+      });
+    } catch (error) {
+      console.error('Error deleting NGO image:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to delete NGO image',
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
