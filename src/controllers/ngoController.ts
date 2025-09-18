@@ -2,9 +2,11 @@ import { Request, Response } from 'express';
 import { AppDataSource } from '../app';
 import { Ngo } from '../models/ngoModel';
 import { getImageUrl, deleteImageFile, getFilePathFromUrl } from '../middleware/uploadMiddleware';
+import { Category } from '../models/categoryModel';
 
 export class NgoController {
   public ngoRepository = AppDataSource.getRepository(Ngo);
+  public categoryRepository = AppDataSource.getRepository(Category);
 
   // GET ALL | GET /api/ngos
   getAllNgos = async (req: Request, res: Response): Promise<void> => {
@@ -109,7 +111,11 @@ export class NgoController {
     try {
       const { id } = req.params;
       const ngoUpdate = req.body;
-      const existingNgo = await this.ngoRepository.findOne({ where: { id } });
+
+      const existingNgo = await this.ngoRepository.findOne({
+        where: { id },
+        relations: ['categories'],
+      });
 
       if (!existingNgo) {
         res.status(404).json({
@@ -119,9 +125,25 @@ export class NgoController {
         return;
       }
 
-      await this.ngoRepository.update(id, ngoUpdate);
+      const { categories, ...ngoTableFields } = ngoUpdate as {
+        categories?: Array<string | { id: string }>;
+        [key: string]: any;
+      };
 
-      const updatedNgo = await this.ngoRepository.findOne({ where: { id } });
+      Object.assign(existingNgo, ngoTableFields);
+
+      if (Array.isArray(categories)) {
+        existingNgo.categories = categories
+          .map(category => (typeof category === 'string' ? { id: category } : category))
+          .filter(Boolean) as Category[];
+      }
+
+      const savedNgo = await this.ngoRepository.save(existingNgo);
+
+      const updatedNgo = await this.ngoRepository.findOne({
+        where: { id: savedNgo.id },
+        relations: ['categories'],
+      });
 
       res.status(200).json({
         success: true,
@@ -430,7 +452,14 @@ export class NgoController {
       ngo.image = undefined;
       await this.ngoRepository.save(ngo);
 
-      res.status(204).end();
+      res.status(200).json({
+        success: true,
+        message: 'NGO profile image deleted successfully',
+        data: {
+          id: ngo.id,
+          image: null,
+        },
+      });
     } catch (error) {
       console.error('Error deleting NGO image:', error);
       res.status(500).json({

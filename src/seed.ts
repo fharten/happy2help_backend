@@ -28,6 +28,7 @@ const seedData = async () => {
       await manager.query('DELETE FROM user_skills'); // Clear user-skills junction table
       await manager.query('DELETE FROM project_skills');
       await manager.query('DELETE FROM project_categories');
+      await manager.query('DELETE FROM ngo_categories'); // Clear ngo-categories junction table
       await manager.query('DELETE FROM application_skills');
       await projectRepository.clear();
       await userRepository.clear();
@@ -96,11 +97,10 @@ const seedData = async () => {
         await userRepository.save(user);
       }
 
-      // 10 NGOs
+      // 10 NGOs (removed industry field)
       const ngosData = Array.from({ length: 10 }).map((_, i) => ({
         name: `NGO ${i + 1}`,
         isNonProfit: true,
-        industry: [categories[i % 10].name],
         streetAndNumber: `Street ${i + 1}`,
         zipCode: 10000 + i,
         image: 'http://localhost:3333/uploads/ngos/bd3f08bd-a642-4b77-becf-4f4dbdea6e1a.png',
@@ -114,6 +114,16 @@ const seedData = async () => {
         isDisabled: false,
       }));
       const ngos = await ngoRepository.save(ngosData.map(n => ngoRepository.create(n)));
+
+      // Assign categories to NGOs (proper many-to-many relationships)
+      for (let i = 0; i < ngos.length; i++) {
+        const ngo = ngos[i];
+        // Each NGO gets 1-3 categories
+        const numCategories = Math.floor(Math.random() * 3) + 1;
+        const ngoCategories = categories.slice(i % 10, (i % 10) + numCategories);
+        ngo.categories = ngoCategories;
+        await ngoRepository.save(ngo);
+      }
 
       // 10 Projects
       const projectsData = Array.from({ length: 10 }).map((_, i) => ({
@@ -188,7 +198,7 @@ const seedData = async () => {
       console.log(`✅ Created ${skills.length} skills`);
       console.log(`✅ Created ${categories.length} categories`);
       console.log(`✅ Created ${users.length} users with skills`);
-      console.log(`✅ Created ${ngos.length} NGOs`);
+      console.log(`✅ Created ${ngos.length} NGOs with categories`);
       console.log(`✅ Created ${projects.length} projects`);
       console.log(`✅ Created ${applicationsData.length} applications with skills`);
 
@@ -200,6 +210,15 @@ const seedData = async () => {
       console.log(
         `👤 Sample user ${sampleUser?.firstName} has ${sampleUser?.skills?.length} skills:`,
         sampleUser?.skills?.map(s => s.name)
+      );
+
+      const sampleNgo = await ngoRepository.findOne({
+        where: { id: ngos[0].id },
+        relations: ['categories'],
+      });
+      console.log(
+        `🏢 Sample NGO ${sampleNgo?.name} has ${sampleNgo?.categories?.length} categories:`,
+        sampleNgo?.categories?.map(c => c.name)
       );
     });
   } catch (error) {
