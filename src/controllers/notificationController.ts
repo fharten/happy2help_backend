@@ -8,9 +8,9 @@ export class NotificationController {
   // GET ALL BY USER ID | GET /api/notifications/user/:userId
   getAllUserNotificationsByUserId = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { userId } = req.params;
+      const { id } = req.params;
       const notifications = await this.notificationRepository.find({
-        where: { userId },
+        where: { userId: id },
       });
 
       res.status(200).json({
@@ -31,9 +31,9 @@ export class NotificationController {
   // GET ALL BY NGO ID | GET /api/notifications/ngo/:ngoId
   getAllNgoNotificationsByNgoId = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { ngoId } = req.params;
+      const { id } = req.params;
       const notifications = await this.notificationRepository.find({
-        where: { ngoId },
+        where: { ngoId: id },
       });
 
       res.status(200).json({
