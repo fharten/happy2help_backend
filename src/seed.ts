@@ -30,7 +30,7 @@ const seedData = async () => {
       await manager.query('DELETE FROM user_skills');
       await manager.query('DELETE FROM project_skills');
       await manager.query('DELETE FROM project_categories');
-      await manager.query('DELETE FROM ngo_categories'); // Clear ngo-categories junction table
+      await manager.query('DELETE FROM ngo_categories');
       await manager.query('DELETE FROM application_skills');
       await notificationRepository.clear(); // ⬅️ NEU: Notifications leeren
       await projectRepository.clear();
@@ -104,29 +104,28 @@ const seedData = async () => {
         await userRepository.save(user);
       }
 
-      // 10 NGOs (removed industry field)
-      const ngosData = Array.from({ length: 10 }).map((_, i) => ({
+      // 10 NGOs (industry entfernt) — fix: überall i verwenden
+      const ngosData = Array.from({ length: 10 }).map((unused, i) => ({
         name: `NGO ${i + 1}`,
         isNonProfit: true,
         streetAndNumber: `Street ${i + 1}`,
         zipCode: 10000 + i,
         image: 'http://localhost:3333/uploads/ngos/bd3f08bd-a642-4b77-becf-4f4dbdea6e1a.png',
-        city: `City${index + 1}`,
-        state: `State${index + 1}`,
-        principal: `Principal ${index + 1}`,
-        loginEmail: `ngo${index + 1}@example.com`,
+        city: `City${i + 1}`,
+        state: `State${i + 1}`,
+        principal: `Principal ${i + 1}`,
+        loginEmail: `ngo${i + 1}@example.com`,
         password: hashedPassword,
-        phone: `+49151000000${index}`,
+        phone: `+49151000000${i}`,
         isActivated: true,
         isDisabled: false,
       }));
-      const ngos = await ngoRepository.save(ngosData.map(n => ngoRepository.create(n)));
+      const ngos = await ngoRepository.save(ngosData.map(ngoItem => ngoRepository.create(ngoItem)));
 
       // Assign categories to NGOs (proper many-to-many relationships)
       for (let i = 0; i < ngos.length; i++) {
         const ngo = ngos[i];
-        // Each NGO gets 1-3 categories
-        const numCategories = Math.floor(Math.random() * 3) + 1;
+        const numCategories = Math.floor(Math.random() * 3) + 1; // 1-3 Kategorien
         const ngoCategories = categories.slice(i % 10, (i % 10) + numCategories);
         ngo.categories = ngoCategories;
         await ngoRepository.save(ngo);
@@ -135,7 +134,8 @@ const seedData = async () => {
       // 10 Projects
       const projectsData = Array.from({ length: 10 }).map((unused, index) => ({
         name: `Project ${index + 1}`,
-        description: `Description for project ${index + 1}. This is a detailed description that explains what this project is about and what volunteers will be doing. It contains at least 50 characters to meet validation requirements.`,
+        description:
+          `Description for project ${index + 1}. This is a detailed description that explains what this project is about and what volunteers will be doing. It contains at least 50 characters to meet validation requirements.`,
         images: [
           'http://localhost:3333/uploads/projects/71bb6806-2568-4734-9022-9509adb0ec27.png',
           'http://localhost:3333/uploads/projects/18055f58-7241-43f7-9469-80592cceb096.png',
@@ -208,7 +208,7 @@ const seedData = async () => {
       const exampleUser = users[1];
       const exampleNgo = ngos[0];
 
-      // Anwendungen mit Relationen nachladen, damit Texte wie im Controller gebaut werden können
+      // Applications inkl. Relationen nachladen
       const applicationsWithRelations: Array<
         Application & { user?: User; project?: Project; ngo?: Ngo }
       > = [];
@@ -220,7 +220,7 @@ const seedData = async () => {
         if (fullApplication) applicationsWithRelations.push(fullApplication);
       }
 
-      // 1) NGO-Notifications: USER_APPLIED (entspricht createApplication → NGO informieren)
+      // 1) NGO-Notifications: USER_APPLIED (createApplication → NGO)
       const ngoNotificationsToCreate: Notification[] = [];
       for (const applicationItem of applicationsWithRelations) {
         if (
@@ -238,7 +238,7 @@ const seedData = async () => {
         }
       }
 
-      // Falls zu wenige vorhanden sind (z. B. 1), fülle auf mindestens 2 Bewerbungs-Notifications auf
+      // Auf mindestens 2 NGO-Notifications auffüllen
       if (ngoNotificationsToCreate.length < 2) {
         const projectForExampleNgo =
           projects.find(projectItem => projectItem.ngoId === exampleNgo.id) || projects[0];
@@ -268,7 +268,7 @@ const seedData = async () => {
 
       await notificationRepository.save(ngoNotificationsToCreate);
 
-      // 2) User-Notifications: NGO_ACCEPTED/NGO_REJECTED (entspricht updateApplicationStatus → User informieren)
+      // 2) User-Notifications: NGO_ACCEPTED / NGO_REJECTED (updateApplicationStatus → User)
       const userNotificationsToCreate: Notification[] = [];
       for (const applicationItem of applicationsWithRelations) {
         if (applicationItem.userId === exampleUser.id && applicationItem.project) {
@@ -294,7 +294,7 @@ const seedData = async () => {
         }
       }
 
-      // Falls der Example User weniger als 2 Status-Notifications hat, füge Dummy-Statusmeldungen hinzu
+      // Mindestens 2 User-Notifications sicherstellen
       if (userNotificationsToCreate.length < 2) {
         const fallbackProject = projects[1] || projects[0];
         userNotificationsToCreate.push(
@@ -317,7 +317,7 @@ const seedData = async () => {
 
       await notificationRepository.save(userNotificationsToCreate);
 
-      // 3) Optional: Eine Withdraw-Notification für die Example NGO (entspricht deleteApplicationById → NGO informieren)
+      // 3) Optional: Withdraw-Notification (deleteApplicationById → NGO)
       const projectForWithdraw = projects.find(projectItem => projectItem.ngoId === exampleNgo.id);
       if (projectForWithdraw) {
         const withdrawNotification = notificationRepository.create({
@@ -337,19 +337,17 @@ const seedData = async () => {
       console.log(`✅ Created ${projects.length} projects`);
       console.log(`✅ Created ${savedApplications.length} applications with skills`);
       console.log(`✅ Created ${ngoNotificationsToCreate.length} NGO notifications (USER_APPLIED)`);
-      console.log(
-        `✅ Created ${userNotificationsToCreate.length} user notifications (ACCEPTED/REJECTED)`
-      );
+      console.log(`✅ Created ${userNotificationsToCreate.length} user notifications (ACCEPTED/REJECTED)`);
       console.log(`✅ Created 1 NGO withdraw notification`);
 
-      // Sample check, unchanged
+      // Sample checks
       const sampleUser = await userRepository.findOne({
         where: { id: users[0].id },
         relations: ['skills'],
       });
       console.log(
         `👤 Sample user ${sampleUser?.firstName} has ${sampleUser?.skills?.length} skills:`,
-        sampleUser?.skills?.map(s => s.name)
+        sampleUser?.skills?.map(skillItem => skillItem.name)
       );
 
       const sampleNgo = await ngoRepository.findOne({
@@ -358,7 +356,7 @@ const seedData = async () => {
       });
       console.log(
         `🏢 Sample NGO ${sampleNgo?.name} has ${sampleNgo?.categories?.length} categories:`,
-        sampleNgo?.categories?.map(c => c.name)
+        sampleNgo?.categories?.map(categoryItem => categoryItem.name)
       );
     });
   } catch (error) {
