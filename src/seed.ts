@@ -5,7 +5,7 @@ import { Skill } from './models/skillModel';
 import { Category } from './models/categoryModel';
 import { Application } from './models/applicationModel';
 import { Project } from './models/projectModel';
-import { Notification } from './models/notificationModel';
+import { Notification } from './models/notificationModel'; // ⬅️ NEU: Notification-Entity
 import { UserRole } from './types/userRole';
 import { ApplicationStatus } from './types/applicationRole';
 import * as bcrypt from 'bcrypt';
@@ -22,23 +22,16 @@ const seedData = async () => {
       const categoryRepository = manager.getRepository(Category);
       const projectRepository = manager.getRepository(Project);
       const applicationRepository = manager.getRepository(Application);
-      const notificationRepository = manager.getRepository(Notification);
+      const notificationRepository = manager.getRepository(Notification); // ⬅️ NEU
 
       console.log('Clearing existing data...');
       await applicationRepository.clear();
       await manager.query('DELETE FROM user_projects');
-<<<<<<< HEAD
       await manager.query('DELETE FROM user_skills');
       await manager.query('DELETE FROM project_skills');
       await manager.query('DELETE FROM project_categories');
       await manager.query('DELETE FROM application_skills');
-      await notificationRepository.clear();
-=======
-      await manager.query('DELETE FROM user_skills'); // Clear user-skills junction table
-      await manager.query('DELETE FROM project_skills');
-      await manager.query('DELETE FROM project_categories');
-      await manager.query('DELETE FROM application_skills');
->>>>>>> 504cae657f6e43ffe2ce44f08d64794cd828dbc2
+      await notificationRepository.clear(); // ⬅️ NEU: Notifications leeren
       await projectRepository.clear();
       await userRepository.clear();
       await ngoRepository.clear();
@@ -83,7 +76,6 @@ const seedData = async () => {
       );
 
       // 10 Users with proper skill relationships
-<<<<<<< HEAD
       const usersData = Array.from({ length: 10 }).map((unused, index) => ({
         firstName: `User${index + 1}`,
         lastName: `Lastname${index + 1}`,
@@ -95,24 +87,10 @@ const seedData = async () => {
         zipCode: 10000 + index,
         city: `City${index + 1}`,
         state: `State${index + 1}`,
-=======
-      const usersData = Array.from({ length: 10 }).map((_, i) => ({
-        firstName: `User${i + 1}`,
-        lastName: `Lastname${i + 1}`,
-        loginEmail: `user${i + 1}@example.com`,
-        password: hashedPassword,
-        image: 'http://localhost:3333/uploads/users/588434aa-41b2-4319-9d2f-c72ca1c8d0ee.png',
-        role: i === 0 ? UserRole.ADMIN : UserRole.USER,
-        yearOfBirth: 1980 + i,
-        zipCode: 10000 + i,
-        city: `City${i + 1}`,
-        state: `State${i + 1}`,
->>>>>>> 504cae657f6e43ffe2ce44f08d64794cd828dbc2
         isActivated: true,
         isDisabled: false,
       }));
 
-<<<<<<< HEAD
       const users = await userRepository.save(
         usersData.map(userItem => userRepository.create(userItem))
       );
@@ -124,23 +102,11 @@ const seedData = async () => {
         user.skills = userSkills;
         await userRepository.save(user);
       }
-=======
-      const users = await userRepository.save(usersData.map(u => userRepository.create(u)));
->>>>>>> 504cae657f6e43ffe2ce44f08d64794cd828dbc2
-
-      // Assign skills to users (proper many-to-many relationships)
-      for (let i = 0; i < users.length; i++) {
-        const user = users[i];
-        const userSkills = skills.slice(i % 10, (i % 10) + 3); // Each user gets 3 skills
-        user.skills = userSkills;
-        await userRepository.save(user);
-      }
 
       // 10 NGOs
       const ngosData = Array.from({ length: 10 }).map((unused, index) => ({
         name: `NGO ${index + 1}`,
         isNonProfit: true,
-<<<<<<< HEAD
         industry: [categories[index % 10].name],
         streetAndNumber: `Street ${index + 1}`,
         zipCode: 10000 + index,
@@ -149,16 +115,6 @@ const seedData = async () => {
         state: `State${index + 1}`,
         principal: `Principal ${index + 1}`,
         loginEmail: `ngo${index + 1}@example.com`,
-=======
-        industry: [categories[i % 10].name],
-        streetAndNumber: `Street ${i + 1}`,
-        zipCode: 10000 + i,
-        image: 'http://localhost:3333/uploads/ngos/bd3f08bd-a642-4b77-becf-4f4dbdea6e1a.png',
-        city: `City${i + 1}`,
-        state: `State${i + 1}`,
-        principal: `Principal ${i + 1}`,
-        loginEmail: `ngo${i + 1}@example.com`,
->>>>>>> 504cae657f6e43ffe2ce44f08d64794cd828dbc2
         password: hashedPassword,
         phone: `+49151000000${index}`,
         isActivated: true,
@@ -167,21 +123,14 @@ const seedData = async () => {
       const ngos = await ngoRepository.save(ngosData.map(ngoItem => ngoRepository.create(ngoItem)));
 
       // 10 Projects
-<<<<<<< HEAD
       const projectsData = Array.from({ length: 10 }).map((unused, index) => ({
         name: `Project ${index + 1}`,
         description: `Description for project ${index + 1}. This is a detailed description that explains what this project is about and what volunteers will be doing. It contains at least 50 characters to meet validation requirements.`,
-=======
-      const projectsData = Array.from({ length: 10 }).map((_, i) => ({
-        name: `Project ${i + 1}`,
-        description: `Description for project ${i + 1}. This is a detailed description that explains what this project is about and what volunteers will be doing. It contains at least 50 characters to meet validation requirements.`,
->>>>>>> 504cae657f6e43ffe2ce44f08d64794cd828dbc2
         images: [
           'http://localhost:3333/uploads/projects/71bb6806-2568-4734-9022-9509adb0ec27.png',
           'http://localhost:3333/uploads/projects/18055f58-7241-43f7-9469-80592cceb096.png',
           'http://localhost:3333/uploads/projects/860032a2-1d09-496d-892c-63a8b4364fe3.png',
         ],
-<<<<<<< HEAD
         categories: [categories[index % 10]],
         ngoId: ngos[index % 10].id,
         ngo: ngos[index % 10],
@@ -192,18 +141,6 @@ const seedData = async () => {
         compensation: `${100 * (index + 1)}€`,
         isActive: index % 2 === 0,
         skills: [skills[index % 10], skills[(index + 1) % 10]],
-=======
-        categories: [categories[i % 10]],
-        ngoId: ngos[i % 10].id,
-        ngo: ngos[i % 10],
-        city: `City${i + 1}`,
-        zipCode: 10000 + i,
-        state: `State${i + 1}`,
-        principal: `Principal ${i + 1}`,
-        compensation: `${100 * (i + 1)}€`,
-        isActive: i % 2 === 0,
-        skills: [skills[i % 10], skills[(i + 1) % 10]],
->>>>>>> 504cae657f6e43ffe2ce44f08d64794cd828dbc2
         startingAt: new Date(),
         endingAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
       }));
@@ -212,24 +149,14 @@ const seedData = async () => {
       );
 
       // Assign participants to projects
-<<<<<<< HEAD
       for (let index = 0; index < projects.length; index++) {
         const project = projects[index];
         project.participants = [users[index]];
-=======
-      for (let i = 0; i < projects.length; i++) {
-        const project = projects[i];
-        project.participants = [users[i]];
->>>>>>> 504cae657f6e43ffe2ce44f08d64794cd828dbc2
         await projectRepository.save(project);
       }
 
       // 10 Applications with Skills
-<<<<<<< HEAD
       const applicationsData = projects.map((projectItem, index) => {
-=======
-      const applicationsData = projects.map((project, i) => {
->>>>>>> 504cae657f6e43ffe2ce44f08d64794cd828dbc2
         const applicationData = {
           projectId: projectItem.id,
           userId: users[index].id,
@@ -243,11 +170,7 @@ const seedData = async () => {
           message: `Application message for ${projectItem.name}`,
         };
 
-<<<<<<< HEAD
         const projectSkills = projectItem.skills || [];
-=======
-        const projectSkills = project.skills || [];
->>>>>>> 504cae657f6e43ffe2ce44f08d64794cd828dbc2
         const numSkillsToAdd = Math.min(
           projectSkills.length,
           Math.max(1, Math.floor(Math.random() * 3) + 1)
@@ -260,7 +183,6 @@ const seedData = async () => {
         };
       });
 
-<<<<<<< HEAD
       // Save applications with their skills and keep references
       const savedApplications: Application[] = [];
       for (const applicationData of applicationsData) {
@@ -395,14 +317,6 @@ const seedData = async () => {
           read: false,
         });
         await notificationRepository.save(withdrawNotification);
-=======
-      // Save applications with their skills
-      for (const appData of applicationsData) {
-        const { skills: appSkills, ...applicationWithoutSkills } = appData;
-        const application = applicationRepository.create(applicationWithoutSkills);
-        application.skills = appSkills;
-        await applicationRepository.save(application);
->>>>>>> 504cae657f6e43ffe2ce44f08d64794cd828dbc2
       }
 
       console.log('Seeding completed successfully!');
@@ -411,7 +325,6 @@ const seedData = async () => {
       console.log(`✅ Created ${users.length} users with skills`);
       console.log(`✅ Created ${ngos.length} NGOs`);
       console.log(`✅ Created ${projects.length} projects`);
-<<<<<<< HEAD
       console.log(`✅ Created ${savedApplications.length} applications with skills`);
       console.log(`✅ Created ${ngoNotificationsToCreate.length} NGO notifications (USER_APPLIED)`);
       console.log(
@@ -420,22 +333,13 @@ const seedData = async () => {
       console.log(`✅ Created 1 NGO withdraw notification`);
 
       // Sample check, unchanged
-=======
-      console.log(`✅ Created ${applicationsData.length} applications with skills`);
-
-      // Log some sample data to verify relationships
->>>>>>> 504cae657f6e43ffe2ce44f08d64794cd828dbc2
       const sampleUser = await userRepository.findOne({
         where: { id: users[0].id },
         relations: ['skills'],
       });
       console.log(
         `👤 Sample user ${sampleUser?.firstName} has ${sampleUser?.skills?.length} skills:`,
-<<<<<<< HEAD
         sampleUser?.skills?.map(skillItem => skillItem.name)
-=======
-        sampleUser?.skills?.map(s => s.name)
->>>>>>> 504cae657f6e43ffe2ce44f08d64794cd828dbc2
       );
     });
   } catch (error) {
