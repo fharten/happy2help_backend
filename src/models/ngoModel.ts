@@ -5,10 +5,13 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Project } from './projectModel';
 import { Application } from './applicationModel';
+import { Category } from './categoryModel';
 
 @Entity()
 export class Ngo {
@@ -24,15 +27,23 @@ export class Ngo {
   @Column({ default: false })
   isNonProfit: boolean;
 
-  @Column({
-    type: 'text',
-    transformer: {
-      to: (value: string[]) => JSON.stringify(value),
-      from: (value: string) => JSON.parse(value || '[]'),
-    },
-    nullable: true,
+  // Many-to-Many relationship with Category
+  @ManyToMany(() => Category, category => category.ngos, {
+    cascade: true,
+    eager: false,
   })
-  industry?: string[];
+  @JoinTable({
+    name: 'ngo_categories', // Junction table name
+    joinColumn: {
+      name: 'ngo_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'category_id',
+      referencedColumnName: 'id',
+    },
+  })
+  categories: Category[];
 
   // Beziehung zu Project (1:n):
   /**
