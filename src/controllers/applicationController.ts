@@ -14,47 +14,14 @@ export class ApplicationController {
   public notificationRepository = AppDataSource.getRepository(Notification);
 
   // GET ALL BY USER ID | GET /api/applications/user/:userId
-  // SSE: sendet "notification.created" Events an den User
   getAllApplicationsByUserId = async (req: Request, res: Response): Promise<void> => {
     const { userId } = req.params;
-    const clientWantsStream =
-      (typeof req.headers.accept === 'string' &&
-        req.headers.accept.includes('text/event-stream')) ||
-      req.query.stream === '1';
-
-    if (clientWantsStream) {
-      try {
-        res.setHeader('Content-Type', 'text/event-stream');
-        res.setHeader('Cache-Control', 'no-cache');
-        res.setHeader('Connection', 'keep-alive');
-        res.setHeader('Access-Control-Allow-Origin', '*');
-
-        const removeConnection = notificationConnections.addUser(userId, res);
-
-        const refreshIntervalId = setInterval(() => {
-          res.write(`event: ping\ndata: {}\n\n`);
-        }, 5000);
-
-        req.on('close', () => {
-          clearInterval(refreshIntervalId);
-          removeConnection();
-          try {
-            res.end();
-          } catch {}
-        });
-        return;
-      } catch (streamError) {
-        console.error('Error establishing SSE for user notifications:', streamError);
-        res.status(500).json({ success: false, message: 'Failed to open notification stream' });
-        return;
-      }
-    }
 
     try {
       const applications = await this.applicationRepository.find({
         where: { userId },
         relations: ['project', 'project.ngo'],
-        order: { appliedAt: 'DESC' },
+      order: { appliedAt: 'DESC' },
       });
 
       res.status(200).json({
@@ -74,43 +41,9 @@ export class ApplicationController {
   };
 
   // GET ALL BY NGO ID | GET /api/applications/ngo/:ngoId
-  // SSE: sendet "notification.created" Events an die NGO
   getAllApplicationsByNgoId = async (req: Request, res: Response): Promise<void> => {
     const { ngoId } = req.params;
     const { status } = req.query;
-
-    const clientWantsStream =
-      (typeof req.headers.accept === 'string' &&
-        req.headers.accept.includes('text/event-stream')) ||
-      req.query.stream === '1';
-
-    if (clientWantsStream) {
-      try {
-        res.setHeader('Content-Type', 'text/event-stream');
-        res.setHeader('Cache-Control', 'no-cache');
-        res.setHeader('Connection', 'keep-alive');
-        res.setHeader('Access-Control-Allow-Origin', '*');
-
-        const removeConnection = notificationConnections.addNgo(ngoId, res);
-
-        const refreshIntervalId = setInterval(() => {
-          res.write(`event: ping\ndata: {}\n\n`);
-        }, 5000);
-
-        req.on('close', () => {
-          clearInterval(refreshIntervalId);
-          removeConnection();
-          try {
-            res.end();
-          } catch {}
-        });
-        return;
-      } catch (streamError) {
-        console.error('Error establishing SSE for NGO notifications:', streamError);
-        res.status(500).json({ success: false, message: 'Failed to open notification stream' });
-        return;
-      }
-    }
 
     try {
       const whereConditions: any = { ngoId };
@@ -270,8 +203,7 @@ export class ApplicationController {
         relations: ['user', 'project', 'ngo'],
       });
 
-      //SSE: Zugehörige ApplicationID für Notification hinzufügen und Notification an NGO streamen
-
+      // Notification erzeugen (NGO)
       if (
         fullApplication &&
         fullApplication.ngoId &&
@@ -279,7 +211,7 @@ export class ApplicationController {
         fullApplication.project
       ) {
         const notificationForNgo = this.notificationRepository.create({
-          applicationId: fullApplication.id, // <<< NEU
+          applicationId: fullApplication.id,
           ngoId: fullApplication.ngoId,
           name: `${fullApplication.user.firstName} ${fullApplication.user.lastName} hat sich beworben`,
           description: `${fullApplication.user.firstName} ${fullApplication.user.lastName} hat sich für „${fullApplication.project.name}” beworben.`,
@@ -287,7 +219,7 @@ export class ApplicationController {
         });
         const savedNotificationForNgo = await this.notificationRepository.save(notificationForNgo);
 
-        // SSE: NGO erhält neue Notification
+        // Stream-Triggers bleiben hier: push an NGO
         notificationConnections.sendToNgo(
           fullApplication.ngoId,
           'notification.created',
@@ -364,7 +296,7 @@ export class ApplicationController {
         relations: ['user', 'project', 'ngo'],
       });
 
-      // Notification an den User erzeugen und streamen (accepted/rejected)
+      // Notification erzeugen (User)
       if (updatedApplication && updatedApplication.userId) {
         const isRejected = status === ApplicationStatus.REJECTED;
 
@@ -386,7 +318,7 @@ export class ApplicationController {
         const savedNotificationForUser =
           await this.notificationRepository.save(notificationForUser);
 
-        // SSE: User erhält neue Notification
+        // Stream-Trigger: push an User
         notificationConnections.sendToUser(
           updatedApplication.userId,
           'notification.created',
@@ -463,12 +395,12 @@ export class ApplicationController {
 
       await this.applicationRepository.delete(id);
 
-      // Alle zugehörigen Notifications laden
+      // zugehörige Notifications finden
       const notificationsForApplication = await this.notificationRepository.find({
         where: { applicationId: id },
       });
 
-      // SSE 'notification.deleted' an die richtigen Empfänger senden
+      // Streams 'notification.deleted' an betroffene Empfänger
       if (notificationsForApplication && notificationsForApplication.length > 0) {
         for (let index = 0; index < notificationsForApplication.length; index++) {
           const notificationItem = notificationsForApplication[index];
@@ -490,7 +422,7 @@ export class ApplicationController {
           }
         }
 
-        // Notifications aus der DB löschen
+        // Notifications aus DB löschen
         await this.notificationRepository.delete({ applicationId: id });
       }
 
