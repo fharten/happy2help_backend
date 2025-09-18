@@ -1,6 +1,11 @@
 import { Router } from 'express';
 import { UserController } from '../controllers/userController';
-import { authenticateToken, requireRole, requireOwnerOrRole } from '../middleware/authMiddleware';
+import {
+  authenticateToken,
+  requireRole,
+  requireOwnerOrRole,
+  requireOwnerOrNgo,
+} from '../middleware/authMiddleware';
 import { uploadSingleImage } from '../middleware/uploadMiddleware';
 
 const router = Router();
@@ -24,12 +29,7 @@ router.post('/', userController.createUser);
 
 // GET SINGLE USER | /users/:id
 // PROTECTED: ONLY ADMIN & NGO & OWNER
-router.get(
-  '/:id',
-  authenticateToken,
-  requireOwnerOrRole(['admin', 'ngo']),
-  userController.getUserById
-);
+router.get('/:id', authenticateToken, requireOwnerOrNgo(), userController.getUserById);
 
 // UPDATE SINGLE USER | /users/:id
 // PROTECTED: ONLY ADMIN & OWNER
