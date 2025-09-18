@@ -79,6 +79,83 @@ export const requireEntityType = (allowedTypes: Array<'user' | 'ngo'>) => {
   };
 };
 
+export const requireOwnerOrNgo = (
+  entityType?: 'user' | 'ngo' | 'project' | 'application' | 'notifications'
+) => {
+  return async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required',
+      });
+    }
+
+    // Allow ANY NGO entity type
+    if (req.user.entityType === 'ngo') {
+      return next();
+    }
+
+    // Check ownership based on entity type
+    const resourceId = req.params.id;
+
+    try {
+      // If no entity type specified, assume direct ownership
+      if (!entityType) {
+        if (req.user.id === resourceId) {
+          return next();
+        }
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied - must be owner or NGO',
+        });
+      }
+
+      // Handle ownership checks (same logic as your existing middleware)
+      switch (entityType) {
+        case 'user':
+          if (req.user.id === resourceId && req.user.entityType === 'user') {
+            return next();
+          }
+          break;
+
+        case 'project':
+          // For users, check if they own the project through NGO ownership
+          // (This case might not apply since NGOs already have access)
+          break;
+
+        case 'application':
+          const applicationRepository = AppDataSource.getRepository(Application);
+          const application = await applicationRepository.findOne({
+            where: { id: resourceId },
+            relations: ['user'],
+          });
+
+          if (
+            application &&
+            req.user.entityType === 'user' &&
+            application.user.id === req.user.id
+          ) {
+            return next();
+          }
+          break;
+
+        // Add other cases as needed
+      }
+
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied - must be owner or NGO',
+      });
+    } catch (error) {
+      console.error('Error in requireOwnerOrNGO middleware:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Internal server error during authorization',
+      });
+    }
+  };
+};
+
 export const requireOwnerOrRole = (
   allowedRoles: string[],
   entityType?: 'user' | 'ngo' | 'project' | 'application' | 'notifications'
