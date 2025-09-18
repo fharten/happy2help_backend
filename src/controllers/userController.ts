@@ -1,9 +1,12 @@
 import { Request, Response } from 'express';
 import { AppDataSource } from '../app';
 import { User } from '../models/userModel';
+import { getImageUrl, deleteImageFile, getFilePathFromUrl } from '../middleware/uploadMiddleware';
+import { Skill } from '../models/skillModel';
 
 export class UserController {
   public userRepository = AppDataSource.getRepository(User);
+  public skillRepository = AppDataSource.getRepository(Skill);
 
   // GET ALL USERS | GET /api/users
   getAllUsers = async (req: Request, res: Response): Promise<void> => {
@@ -107,8 +110,12 @@ export class UserController {
   updateUserById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const userUpdate = req.body;
-      const existingUser = await this.userRepository.findOne({ where: { id } });
+      const { skills: skillIds, ...userUpdate } = req.body;
+
+      const existingUser = await this.userRepository.findOne({
+        where: { id },
+        relations: ['skills'],
+      });
 
       if (!existingUser) {
         res.status(404).json({
@@ -118,13 +125,25 @@ export class UserController {
         return;
       }
 
-      await this.userRepository.update(id, userUpdate);
-      const updatedUser = await this.userRepository.findOne({ where: { id } });
+      // Update the existingUser object with new data
+      Object.assign(existingUser, userUpdate);
+
+      // Handle skills update if provided
+      if (skillIds !== undefined) {
+        let skills: Skill[] = [];
+        if (Array.isArray(skillIds) && skillIds.length > 0) {
+          skills = await this.skillRepository.findByIds(skillIds);
+        }
+        existingUser.skills = skills;
+      }
+
+      // Save everything at once
+      const savedUser = await this.userRepository.save(existingUser);
 
       res.status(200).json({
         success: true,
         message: 'User updated successfully',
-        data: updatedUser,
+        data: savedUser,
       });
     } catch (error) {
       console.error('Error updating user:', error);
@@ -247,6 +266,110 @@ export class UserController {
       res.status(500).json({
         success: false,
         message: 'Failed to retrieve user applications',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  };
+
+  // UPLOAD USER PROFILE IMAGE | POST /api/users/:id/image
+  uploadUserImage = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+
+      if (!req.file) {
+        res.status(400).json({
+          success: false,
+          message: 'No image file uploaded',
+        });
+        return;
+      }
+
+      const user = await this.userRepository.findOne({ where: { id } });
+
+      if (!user) {
+        res.status(404).json({
+          success: false,
+          message: 'User not found',
+        });
+        return;
+      }
+
+      // DELETE OLD IMAGE IF EXISTS
+      if (user.image) {
+        try {
+          const oldImagePath = getFilePathFromUrl(user.image);
+          deleteImageFile(oldImagePath);
+        } catch (error) {
+          console.error('Error deleting old user image:', error);
+        }
+      }
+
+      // GENERATE NEW IMAGE URL
+      const imageUrl = getImageUrl(req.file.filename, 'users');
+
+      // UPDATE USER WITH NEW IMAGE URL
+      user.image = imageUrl;
+      await this.userRepository.save(user);
+
+      res.status(200).json({
+        success: true,
+        message: 'User profile image uploaded successfully',
+        data: {
+          id: user.id,
+          image: user.image,
+        },
+      });
+    } catch (error) {
+      console.error('Error uploading user image:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to upload user image',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  };
+
+  // DELETE USER PROFILE IMAGE | DELETE /api/users/:id/image
+  deleteUserImage = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+
+      const user = await this.userRepository.findOne({ where: { id } });
+
+      if (!user) {
+        res.status(404).json({
+          success: false,
+          message: 'User not found',
+        });
+        return;
+      }
+
+      if (!user.image) {
+        res.status(400).json({
+          success: false,
+          message: 'User has no profile image to delete',
+        });
+        return;
+      }
+
+      // DELETE IMAGE FILE
+      try {
+        const imagePath = getFilePathFromUrl(user.image);
+        deleteImageFile(imagePath);
+      } catch (error) {
+        console.error('Error deleting user image file:', error);
+      }
+
+      // REMOVE IMAGE URL FROM USER
+      user.image = undefined;
+      await this.userRepository.save(user);
+
+      res.status(204).end();
+    } catch (error) {
+      console.error('Error deleting user image:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to delete user image',
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
