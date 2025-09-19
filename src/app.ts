@@ -18,11 +18,18 @@ config();
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3333;
+const dbpath =
+  process.env.NODE_ENV === 'production'
+    ? process.env.DATABASE_PATH_PRODUCTION || '/home/h2h/data/happy2help.sqlite'
+    : process.env.DATABASE_PATH_DEV || 'database.sqlite';
+
+console.log('Environment:', process.env.NODE_ENV);
+console.log('Database path:', dbpath);
 
 // DB CONNECTION
 const AppDataSource = new DataSource({
   type: 'better-sqlite3',
-  database: process.env.DATABASE_PATH || 'database.sqlite',
+  database: dbpath,
   entities: [Application, Category, Ngo, Notification, Project, RefreshToken, Skill, User], // Add your entities here
   synchronize: process.env.NODE_ENV !== 'production', // SET TO FALSE IN PRODUCTION
   logging: false,
@@ -39,18 +46,22 @@ app.use(express.urlencoded({ extended: true }));
 
 // STATIC FILE SERVING FOR UPLOADS
 const uploadsPath =
-  process.env.NODE_ENV === 'production' ? '/home/fh/uploads' : path.join(process.cwd(), 'uploads');
+  process.env.NODE_ENV === 'production'
+    ? process.env.UPLOADS_PATH || '/home/h2h/uploads'
+    : path.join(process.cwd(), 'uploads');
 app.use('/uploads', express.static(uploadsPath));
 
-// BASIC ROUTED
+// BASIC ROUTES
 app.get('/', (req, res) => {
   res.json({ message: 'API is running!' });
 });
 
 // INITIALIZE DB AND START SERVER
 const startServer = async () => {
-  AppDataSource.initialize();
   try {
+    console.log('NODE_ENV:', process.env.NODE_ENV);
+    console.log('Database path:', dbpath);
+
     await AppDataSource.initialize();
     console.log('Database connected successfully');
 
