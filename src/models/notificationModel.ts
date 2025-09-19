@@ -6,6 +6,9 @@ export class Notification {
   id: string;
 
   @Column('uuid', { nullable: true })
+  applicationId?: string;
+
+  @Column('uuid', { nullable: true })
   ngoId?: string;
 
   @Column('uuid', { nullable: true })

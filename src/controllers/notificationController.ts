@@ -1,16 +1,57 @@
 import { Request, Response } from 'express';
 import { AppDataSource } from '../app';
 import { Notification } from '../models/notificationModel';
+import { notificationConnections } from '../services/notificationConnections';
 
 export class NotificationController {
   public notificationRepository = AppDataSource.getRepository(Notification);
 
   // GET ALL BY USER ID | GET /api/notifications/user/:userId
+  // Optional SSE: streamt Events für diesen User
   getAllUserNotificationsByUserId = async (req: Request, res: Response): Promise<void> => {
+    const { id } = req.params as { id: string };
+
+    const clientWantsStream =
+      (typeof req.headers.accept === 'string' &&
+        req.headers.accept.includes('text/event-stream')) ||
+      req.query.stream === '1';
+
+    if (clientWantsStream) {
+      try {
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        // res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+
+        const removeConnection = notificationConnections.addUser(id, res);
+        console.log(`[SSE] User ${id} connection added to registry`);
+
+        const refreshIntervalId = setInterval(() => {
+          res.write(
+            `event: ping\ndata: ${JSON.stringify({ type: 'ping', timestamp: new Date().toISOString() })}\n\n`
+          );
+        }, 5000);
+
+        req.on('close', () => {
+          clearInterval(refreshIntervalId);
+          removeConnection();
+          try {
+            res.end();
+          } catch {}
+        });
+        return;
+      } catch (streamError) {
+        console.error('Error establishing SSE for user notifications:', streamError);
+        res.status(500).json({ success: false, message: 'Failed to open notification stream' });
+        return;
+      }
+    }
+
+    // normale JSON-Antwort
     try {
-      const { userId } = req.params;
       const notifications = await this.notificationRepository.find({
-        where: { userId },
+        where: { userId: id },
+        order: { id: 'DESC' },
       });
 
       res.status(200).json({
@@ -29,11 +70,50 @@ export class NotificationController {
   };
 
   // GET ALL BY NGO ID | GET /api/notifications/ngo/:ngoId
+  // Optional SSE: streamt Events für diese NGO
   getAllNgoNotificationsByNgoId = async (req: Request, res: Response): Promise<void> => {
+    const { id } = req.params as { id: string };
+
+    const clientWantsStream =
+      (typeof req.headers.accept === 'string' &&
+        req.headers.accept.includes('text/event-stream')) ||
+      req.query.stream === '1';
+
+    if (clientWantsStream) {
+      try {
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        // res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+        const removeConnection = notificationConnections.addNgo(id, res);
+
+        const refreshIntervalId = setInterval(() => {
+          res.write(
+            `event: ping\ndata: ${JSON.stringify({ type: 'ping', timestamp: new Date().toISOString() })}\n\n`
+          );
+        }, 5000);
+
+        req.on('close', () => {
+          clearInterval(refreshIntervalId);
+          removeConnection();
+          try {
+            res.end();
+          } catch {}
+        });
+        return;
+      } catch (streamError) {
+        console.error('Error establishing SSE for NGO notifications:', streamError);
+        res.status(500).json({ success: false, message: 'Failed to open notification stream' });
+        return;
+      }
+    }
+
+    // normale JSON-Antwort
     try {
-      const { ngoId } = req.params;
       const notifications = await this.notificationRepository.find({
-        where: { ngoId },
+        where: { ngoId: id },
+        order: { id: 'DESC' },
       });
 
       res.status(200).json({
@@ -95,6 +175,22 @@ export class NotificationController {
       const notification = this.notificationRepository.create(notificationData);
       const savedNotification = await this.notificationRepository.save(notification);
 
+      // Send real-time notifications
+      if (notificationData.userId) {
+        notificationConnections.sendToUser(
+          notificationData.userId,
+          'notification',
+          savedNotification
+        );
+      }
+      if (notificationData.ngoId) {
+        notificationConnections.sendToNgo(
+          notificationData.ngoId,
+          'notification',
+          savedNotification
+        );
+      }
+
       res.status(201).json({
         success: true,
         message: 'Notification created successfully',
@@ -128,6 +224,21 @@ export class NotificationController {
       await this.notificationRepository.update(id, notificationUpdate);
 
       const updatedNotification = await this.notificationRepository.findOne({ where: { id } });
+
+      if (updatedNotification?.userId) {
+        notificationConnections.sendToUser(
+          updatedNotification.userId,
+          'notification_updated',
+          updatedNotification
+        );
+      }
+      if (updatedNotification?.ngoId) {
+        notificationConnections.sendToNgo(
+          updatedNotification.ngoId,
+          'notification_updated',
+          updatedNotification
+        );
+      }
 
       res.status(200).json({
         success: true,
