@@ -22,7 +22,7 @@ const dbpath =
   process.env.NODE_ENV === 'production'
     ? process.env.DATABASE_PATH_PRODUCTION
       ? process.env.DATABASE_PATH_PRODUCTION
-      : ''
+      : '/home/h2h/data/happy2help.sqlite'
     : 'database.sqlite';
 
 // DB CONNECTION
@@ -57,8 +57,10 @@ app.get('/', (req, res) => {
 
 // INITIALIZE DB AND START SERVER
 const startServer = async () => {
-  AppDataSource.initialize();
   try {
+    console.log('NODE_ENV:', process.env.NODE_ENV);
+    console.log('Database path:', dbpath);
+
     await AppDataSource.initialize();
     console.log('Database connected successfully');
 
