@@ -299,11 +299,24 @@ export class ApplicationController {
         return;
       }
 
-      await this.applicationRepository.update(id, applicationUpdate);
+      const { skills, ...applicationTableFields } = applicationUpdate as {
+        skills?: Array<string | { id: string }>;
+        [key: string]: any;
+      };
+
+      Object.assign(existingApplication, applicationTableFields);
+
+      if (Array.isArray(skills)) {
+        (existingApplication as any).skills = skills
+          .map(s => (typeof s === 'string' ? { id: s } : s))
+          .filter(Boolean);
+      }
+
+      const savedApplication = await this.applicationRepository.save(existingApplication);
 
       const updatedApplication = await this.applicationRepository.findOne({
-        where: { id },
-        relations: ['user', 'project', 'ngo'],
+        where: { id: savedApplication.id },
+        relations: ['user', 'project', 'ngo', 'skills'],
       });
 
       res.status(200).json({
