@@ -46,7 +46,7 @@ app.use(express.urlencoded({ extended: true }));
 // STATIC FILE SERVING FOR UPLOADS
 const uploadsPath =
   process.env.NODE_ENV === 'production'
-    ? process.env.UPLOADS_PATH || '/home/fh/uploads'
+    ? process.env.UPLOADS_PATH || '/home/h2h/uploads'
     : path.join(process.cwd(), 'uploads');
 app.use('/uploads', express.static(uploadsPath));
 
