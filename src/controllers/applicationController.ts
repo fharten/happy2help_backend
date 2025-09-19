@@ -21,7 +21,7 @@ export class ApplicationController {
       const applications = await this.applicationRepository.find({
         where: { userId },
         relations: ['project', 'project.ngo'],
-      order: { appliedAt: 'DESC' },
+        order: { appliedAt: 'DESC' },
       });
 
       res.status(200).json({
@@ -218,11 +218,17 @@ export class ApplicationController {
           read: false,
         });
         const savedNotificationForNgo = await this.notificationRepository.save(notificationForNgo);
+        console.log(
+          'Notification saved for NGO:',
+          savedNotificationForNgo.id,
+          'NGO ID:',
+          fullApplication.ngoId
+        );
 
         // Stream-Triggers bleiben hier: push an NGO
         notificationConnections.sendToNgo(
           fullApplication.ngoId,
-          'notification.created',
+          'notification_created',
           savedNotificationForNgo
         );
       }
@@ -244,6 +250,11 @@ export class ApplicationController {
 
   // UPDATE APPLICATION STATUS | PUT /api/applications/:id/status
   updateApplicationStatus = async (req: Request, res: Response): Promise<void> => {
+    console.log('=== updateApplicationStatus called ===');
+    console.log('Request params:', req.params);
+    console.log('Request body:', req.body);
+    console.log('Method:', req.method);
+    console.log('URL:', req.url);
     try {
       const { id } = req.params;
       const { status } = req.body;
@@ -295,10 +306,12 @@ export class ApplicationController {
         where: { id },
         relations: ['user', 'project', 'ngo'],
       });
+      console.log('1 updated application user id:', updatedApplication?.userId);
 
       // Notification erzeugen (User)
       if (updatedApplication && updatedApplication.userId) {
         const isRejected = status === ApplicationStatus.REJECTED;
+        console.log('2 updated application user id:', updatedApplication.userId);
 
         const notificationText =
           typeof req.body.notificationDescription === 'string' &&
@@ -317,11 +330,24 @@ export class ApplicationController {
         });
         const savedNotificationForUser =
           await this.notificationRepository.save(notificationForUser);
+        console.log(
+          'Notification saved for User:',
+          savedNotificationForUser.id,
+          'User ID:',
+          updatedApplication.userId
+        );
+        console.log(
+          `[NOTIFICATION] Attempting to send notification to user ${updatedApplication.userId}`
+        );
+        console.log(
+          `[NOTIFICATION] Current user connections:`,
+          Object.keys(notificationConnections)
+        );
 
         // Stream-Trigger: push an User
         notificationConnections.sendToUser(
           updatedApplication.userId,
-          'notification.created',
+          'notification_created',
           savedNotificationForUser
         );
       }
@@ -347,7 +373,10 @@ export class ApplicationController {
       const { id } = req.params;
       const applicationUpdate = req.body;
 
-      const existingApplication = await this.applicationRepository.findOne({ where: { id } });
+      const existingApplication = await this.applicationRepository.findOne({
+        where: { id },
+        relations: ['user', 'project', 'ngo'], // Add relations
+      });
 
       if (!existingApplication) {
         res.status(404).json({
@@ -356,6 +385,11 @@ export class ApplicationController {
         });
         return;
       }
+
+      // Check if status is changing
+      const isStatusChange =
+        applicationUpdate.status && applicationUpdate.status !== existingApplication.status;
+      const newStatus = applicationUpdate.status;
 
       const { skills, ...applicationTableFields } = applicationUpdate as {
         skills?: Array<string | { id: string }>;
@@ -371,6 +405,68 @@ export class ApplicationController {
       }
 
       const savedApplication = await this.applicationRepository.save(existingApplication);
+
+      // Handle status change notifications
+      if (
+        isStatusChange &&
+        (newStatus === ApplicationStatus.ACCEPTED || newStatus === ApplicationStatus.REJECTED)
+      ) {
+        // Add user to project participants if accepted
+        if (newStatus === ApplicationStatus.ACCEPTED) {
+          const user = await this.userRepository.findOne({
+            where: { id: existingApplication.userId },
+            relations: ['projects'],
+          });
+
+          const project = await this.projectRepository.findOne({
+            where: { id: existingApplication.projectId },
+            relations: ['participants'],
+          });
+
+          if (user && project) {
+            const isAlreadyParticipant = project.participants.some(p => p.id === user.id);
+            if (!isAlreadyParticipant) {
+              project.participants.push(user);
+              await this.projectRepository.save(project);
+            }
+          }
+        }
+
+        // Create notification for user
+        const isRejected = newStatus === ApplicationStatus.REJECTED;
+
+        const notificationText =
+          typeof req.body.notificationDescription === 'string' &&
+          req.body.notificationDescription.trim().length > 0
+            ? req.body.notificationDescription
+            : isRejected
+              ? 'Deine Bewerbung wurde abgelehnt.'
+              : `Deine Bewerbung für „${existingApplication?.project?.name}" wurde akzeptiert.`;
+
+        const notificationForUser = this.notificationRepository.create({
+          applicationId: existingApplication.id,
+          userId: existingApplication.userId,
+          name: isRejected ? 'Bewerbung abgelehnt' : 'Bewerbung angenommen',
+          description: notificationText,
+          read: false,
+        });
+
+        const savedNotificationForUser =
+          await this.notificationRepository.save(notificationForUser);
+        console.log(
+          'Notification saved for User:',
+          savedNotificationForUser.id,
+          'User ID:',
+          existingApplication.userId
+        );
+
+        // Send SSE notification
+        notificationConnections.sendToUser(
+          existingApplication.userId,
+          'notification_created',
+          savedNotificationForUser
+        );
+      }
 
       const updatedApplication = await this.applicationRepository.findOne({
         where: { id: savedApplication.id },
@@ -422,14 +518,14 @@ export class ApplicationController {
           if (typeof notificationItem.ngoId === 'string' && notificationItem.ngoId.length > 0) {
             notificationConnections.sendToNgo(
               notificationItem.ngoId,
-              'notification.deleted',
+              'notification_deleted',
               deletionPayload
             );
           }
           if (typeof notificationItem.userId === 'string' && notificationItem.userId.length > 0) {
             notificationConnections.sendToUser(
               notificationItem.userId,
-              'notification.deleted',
+              'notification_deleted',
               deletionPayload
             );
           }

@@ -24,9 +24,12 @@ export class NotificationController {
         // res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
 
         const removeConnection = notificationConnections.addUser(id, res);
+        console.log(`[SSE] User ${id} connection added to registry`);
 
         const refreshIntervalId = setInterval(() => {
-          res.write(`event: ping\ndata: {}\n\n`);
+          res.write(
+            `event: ping\ndata: ${JSON.stringify({ type: 'ping', timestamp: new Date().toISOString() })}\n\n`
+          );
         }, 5000);
 
         req.on('close', () => {
@@ -86,7 +89,9 @@ export class NotificationController {
         const removeConnection = notificationConnections.addNgo(id, res);
 
         const refreshIntervalId = setInterval(() => {
-          res.write(`event: ping\ndata: {}\n\n`);
+          res.write(
+            `event: ping\ndata: ${JSON.stringify({ type: 'ping', timestamp: new Date().toISOString() })}\n\n`
+          );
         }, 5000);
 
         req.on('close', () => {

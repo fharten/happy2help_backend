@@ -9,6 +9,7 @@ const ngoNotificationConnections: ConnectionRegistry = Object.create(null);
 function addConnection(registry: ConnectionRegistry, key: string, response: Response): () => void {
   if (!registry[key]) registry[key] = [];
   registry[key].push(response);
+  console.log(`SSE connection added for key: ${key}. Total connections: ${registry[key].length}`);
 
   // Cleanup-Funktion für genau diese Response
   return () => {
@@ -16,6 +17,7 @@ function addConnection(registry: ConnectionRegistry, key: string, response: Resp
     if (!listForKey) return;
     const indexOfResponse = listForKey.indexOf(response);
     if (indexOfResponse !== -1) listForKey.splice(indexOfResponse, 1);
+    console.log(`SSE connection removed for key: ${key}. Remaining connections: ${listForKey.length}`);
     if (listForKey.length === 0) delete registry[key];
   };
 }
@@ -27,16 +29,21 @@ function sendEvent(
   payload: unknown
 ): void {
   const listForKey = registry[key];
-  if (!listForKey || listForKey.length === 0) return;
+  if (!listForKey || listForKey.length === 0) {
+    console.log(`No SSE connections found for key: ${key}`);
+    return;
+  }
 
   const serialized = `event: ${eventName}\ndata: ${JSON.stringify(payload)}\n\n`;
+  console.log(`Sending SSE event to ${listForKey.length} connection(s) for key ${key}:`, eventName);
 
   // An alle offenen Verbindungen des Empfängers senden
   for (let index = 0; index < listForKey.length; index++) {
     const response = listForKey[index];
     try {
       response.write(serialized);
-    } catch {
+    } catch (error) {
+      console.error(`Failed to write to SSE connection for key ${key}:`, error);
       // Bei Schreibfehler Verbindung aus der Liste entfernen
       const failureIndex = listForKey.indexOf(response);
       if (failureIndex !== -1) listForKey.splice(failureIndex, 1);
