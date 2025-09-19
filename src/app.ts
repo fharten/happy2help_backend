@@ -20,10 +20,11 @@ const app = express();
 const PORT = Number(process.env.PORT) || 3333;
 const dbpath =
   process.env.NODE_ENV === 'production'
-    ? process.env.DATABASE_PATH_PRODUCTION
-      ? process.env.DATABASE_PATH_PRODUCTION
-      : '/home/h2h/data/happy2help.sqlite'
-    : 'database.sqlite';
+    ? process.env.DATABASE_PATH_PRODUCTION || '/home/h2h/data/happy2help.sqlite'
+    : process.env.DATABASE_PATH_DEV || 'database.sqlite';
+
+console.log('Environment:', process.env.NODE_ENV);
+console.log('Database path:', dbpath);
 
 // DB CONNECTION
 const AppDataSource = new DataSource({
