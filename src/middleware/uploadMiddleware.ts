@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 const createUploadDirs = () => {
   const baseDir =
     process.env.NODE_ENV === 'production'
-      ? '/home/fh/uploads' // UBERSPACE PERSISTENT (hopefully)
+      ? '/home/h2h/uploads' // UBERSPACE PERSISTENT (hopefully)
       : path.join(process.cwd(), 'uploads');
 
   const dirs = [
@@ -97,7 +97,7 @@ export const getFilenameFromUrl = (url: string): string => {
 export const getFilePathFromUrl = (url: string): string => {
   const baseDir =
     process.env.NODE_ENV === 'production'
-      ? '/home/fh/uploads'
+      ? '/home/h2h/uploads'
       : path.join(process.cwd(), 'uploads');
 
   const urlPath = new URL(url).pathname;
