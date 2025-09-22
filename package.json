@@ -10,7 +10,6 @@
     "seed": "ts-node src/seed.ts",
     "build": "tsc",
     "start": "node dist/app.js"
-   // "postinstall": "npm run build"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
