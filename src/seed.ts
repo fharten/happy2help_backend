@@ -5,6 +5,7 @@ import { Skill } from './models/skillModel';
 import { Category } from './models/categoryModel';
 import { Application } from './models/applicationModel';
 import { Project } from './models/projectModel';
+import { Notification } from './models/notificationModel';
 import { UserRole } from './types/userRole';
 import { ApplicationStatus } from './types/applicationRole';
 import * as bcrypt from 'bcrypt';
@@ -21,15 +22,17 @@ const seedData = async () => {
       const categoryRepository = manager.getRepository(Category);
       const projectRepository = manager.getRepository(Project);
       const applicationRepository = manager.getRepository(Application);
+      const notificationRepository = manager.getRepository(Notification);
 
       console.log('Clearing existing data...');
       await applicationRepository.clear();
       await manager.query('DELETE FROM user_projects');
-      await manager.query('DELETE FROM user_skills'); // Clear user-skills junction table
+      await manager.query('DELETE FROM user_skills');
       await manager.query('DELETE FROM project_skills');
       await manager.query('DELETE FROM project_categories');
-      await manager.query('DELETE FROM ngo_categories'); // Clear ngo-categories junction table
+      await manager.query('DELETE FROM ngo_categories');
       await manager.query('DELETE FROM application_skills');
+      await notificationRepository.clear();
       await projectRepository.clear();
       await userRepository.clear();
       await ngoRepository.clear();
@@ -39,159 +42,618 @@ const seedData = async () => {
       const saltRounds = 12;
       const hashedPassword = await bcrypt.hash('password123', saltRounds);
 
-      // 10 Skills
+      // Skills (German)
       const skillsData = [
         { name: 'Web Development', description: 'Frontend and backend development' },
-        { name: 'Graphic Design', description: 'Visual and branding design' },
-        { name: 'Project Management', description: 'Managing teams and projects' },
+        { name: 'Grafik Design', description: 'Visual and branding design' },
+        { name: 'Projekt Management', description: 'Managing teams and projects' },
         { name: 'Marketing', description: 'Digital and traditional marketing' },
-        { name: 'Teaching', description: 'Educational skills' },
+        { name: 'Unterrichten', description: 'Educational skills' },
         { name: 'Social Media', description: 'Social media management' },
-        { name: 'Photography', description: 'Photography and editing' },
-        { name: 'Translation', description: 'Language translation' },
-        { name: 'Event Planning', description: 'Organizing events' },
+        { name: 'Fotografie', description: 'Photography and editing' },
+        { name: 'Übersetzung', description: 'Language translation' },
+        { name: 'Eventplanung', description: 'Organizing events' },
         { name: 'Fundraising', description: 'Raising funds for causes' },
       ];
-      const skills = await skillRepository.save(skillsData.map(s => skillRepository.create(s)));
+      const skills = await skillRepository.save(
+        skillsData.map(skillItem => skillRepository.create(skillItem))
+      );
 
-      // 10 Categories
+      // Categories (German)
       const categoriesData = [
-        { name: 'Education' },
-        { name: 'Healthcare' },
-        { name: 'Environment' },
-        { name: 'Social Services' },
-        { name: 'Arts & Culture' },
-        { name: 'Sports' },
-        { name: 'Technology' },
-        { name: 'Community' },
-        { name: 'Animal Welfare' },
-        { name: 'Human Rights' },
+        { name: 'Bildung' },
+        { name: 'Gesundheit' },
+        { name: 'Umwelt' },
+        { name: 'Sozialarbeit' },
+        { name: 'Kunst & Kultur' },
+        { name: 'Sport' },
+        { name: 'Technologie' },
+        { name: 'Gemeinschaft' },
+        { name: 'Tierschutz' },
+        { name: 'Menschenrechte' },
       ];
       const categories = await categoryRepository.save(
-        categoriesData.map(c => categoryRepository.create(c))
+        categoriesData.map(categoryItem => categoryRepository.create(categoryItem))
       );
 
-      // 10 Users with proper skill relationships
-      const usersData = Array.from({ length: 10 }).map((_, i) => ({
-        firstName: `User${i + 1}`,
-        lastName: `Lastname${i + 1}`,
-        loginEmail: `user${i + 1}@example.com`,
-        password: hashedPassword,
-        image: 'http://localhost:3333/uploads/users/588434aa-41b2-4319-9d2f-c72ca1c8d0ee.png',
-        role: i === 0 ? UserRole.ADMIN : UserRole.USER,
-        yearOfBirth: 1980 + i,
-        zipCode: 10000 + i,
-        city: `City${i + 1}`,
-        state: `State${i + 1}`,
-        isActivated: true,
-        isDisabled: false,
-      }));
+      // Helper function to find skills by name
+      const findSkillsByNames = (names: string[]) => {
+        return names.map(name => skills.find(s => s.name === name)).filter(Boolean) as Skill[];
+      };
 
-      const users = await userRepository.save(usersData.map(u => userRepository.create(u)));
+      // Users with specific German names and skills
+      const usersData = [
+        {
+          firstName: 'Admin',
+          lastName: 'User',
+          loginEmail: 'admin@example.com',
+          password: hashedPassword,
+          image:
+            'https://raw.githubusercontent.com/fharten/happy2help_frontend/refs/heads/main/public/images/h2h_logo_mint.png',
+          role: UserRole.ADMIN,
+          yearOfBirth: 1985,
+          zipCode: 10115,
+          city: 'Berlin',
+          state: 'Berlin',
+          isActivated: true,
+          isDisabled: false,
+          skillNames: ['Web Development', 'Projekt Management'],
+        },
+        {
+          firstName: 'Alexander',
+          lastName: 'Braun',
+          loginEmail: 'alexander.braun@example.com',
+          password: hashedPassword,
+          image: 'http://localhost:3333/uploads/users/588434aa-41b2-4319-9d2f-c72ca1c8d0ee.png',
+          role: UserRole.USER,
+          yearOfBirth: 1990,
+          zipCode: 10115,
+          city: 'Berlin',
+          state: 'Berlin',
+          isActivated: true,
+          isDisabled: false,
+          skillNames: ['Web Development', 'Projekt Management', 'Marketing', 'Fundraising'],
+        },
+        {
+          firstName: 'Laura',
+          lastName: 'Peters',
+          loginEmail: 'laura.peters@example.com',
+          password: hashedPassword,
+          image: 'http://localhost:3333/uploads/users/588434aa-41b2-4319-9d2f-c72ca1c8d0ee.png',
+          role: UserRole.USER,
+          yearOfBirth: 1992,
+          zipCode: 80331,
+          city: 'München',
+          state: 'Bayern',
+          isActivated: true,
+          isDisabled: false,
+          skillNames: ['Grafik Design', 'Eventplanung', 'Social Media', 'Übersetzung'],
+        },
+        {
+          firstName: 'Jonas',
+          lastName: 'Meier',
+          loginEmail: 'jonas.meier@example.com',
+          password: hashedPassword,
+          image: 'http://localhost:3333/uploads/users/588434aa-41b2-4319-9d2f-c72ca1c8d0ee.png',
+          role: UserRole.USER,
+          yearOfBirth: 1988,
+          zipCode: 50667,
+          city: 'Köln',
+          state: 'Nordrhein-Westfalen',
+          isActivated: true,
+          isDisabled: false,
+          skillNames: ['Fotografie', 'Marketing', 'Unterrichten', 'Projekt Management'],
+        },
+        {
+          firstName: 'Sarah',
+          lastName: 'Klein',
+          loginEmail: 'sarah.klein@example.com',
+          password: hashedPassword,
+          image: 'http://localhost:3333/uploads/users/588434aa-41b2-4319-9d2f-c72ca1c8d0ee.png',
+          role: UserRole.USER,
+          yearOfBirth: 1995,
+          zipCode: 20095,
+          city: 'Hamburg',
+          state: 'Hamburg',
+          isActivated: true,
+          isDisabled: false,
+          skillNames: ['Web Development', 'Grafik Design', 'Social Media', 'Fundraising'],
+        },
+        {
+          firstName: 'David',
+          lastName: 'Hoffmann',
+          loginEmail: 'david.hoffmann@example.com',
+          password: hashedPassword,
+          image: 'http://localhost:3333/uploads/users/588434aa-41b2-4319-9d2f-c72ca1c8d0ee.png',
+          role: UserRole.USER,
+          yearOfBirth: 1987,
+          zipCode: 11067,
+          city: 'Dresden',
+          state: 'Sachsen',
+          isActivated: true,
+          isDisabled: false,
+          skillNames: ['Unterrichten', 'Eventplanung', 'Projekt Management', 'Übersetzung'],
+        },
+      ];
 
-      // Assign skills to users (proper many-to-many relationships)
-      for (let i = 0; i < users.length; i++) {
-        const user = users[i];
-        const userSkills = skills.slice(i % 10, (i % 10) + 3); // Each user gets 3 skills
-        user.skills = userSkills;
-        await userRepository.save(user);
+      const users = [];
+      for (const userData of usersData) {
+        const { skillNames, ...userWithoutSkills } = userData;
+        const user = userRepository.create(userWithoutSkills);
+        user.skills = findSkillsByNames(skillNames);
+        const savedUser = await userRepository.save(user);
+        users.push(savedUser);
       }
 
-      // 10 NGOs (removed industry field)
-      const ngosData = Array.from({ length: 10 }).map((_, i) => ({
-        name: `NGO ${i + 1}`,
-        isNonProfit: true,
-        streetAndNumber: `Street ${i + 1}`,
-        zipCode: 10000 + i,
-        image: 'http://localhost:3333/uploads/ngos/bd3f08bd-a642-4b77-becf-4f4dbdea6e1a.png',
-        city: `City${i + 1}`,
-        state: `State${i + 1}`,
-        principal: `Principal ${i + 1}`,
-        loginEmail: `ngo${i + 1}@example.com`,
-        password: hashedPassword,
-        phone: `+49151000000${i}`,
-        isActivated: true,
-        isDisabled: false,
-      }));
-      const ngos = await ngoRepository.save(ngosData.map(n => ngoRepository.create(n)));
+      // Helper function to find category by name
+      const findCategoryByName = (name: string) => {
+        return categories.find(c => c.name === name);
+      };
 
-      // Assign categories to NGOs (proper many-to-many relationships)
-      for (let i = 0; i < ngos.length; i++) {
-        const ngo = ngos[i];
-        // Each NGO gets 1-3 categories
-        const numCategories = Math.floor(Math.random() * 3) + 1;
-        const ngoCategories = categories.slice(i % 10, (i % 10) + numCategories);
-        ngo.categories = ngoCategories;
-        await ngoRepository.save(ngo);
+      // NGOs with German data
+      const ngosData = [
+        {
+          name: 'ZukunftsBildung e.V.',
+          isNonProfit: true,
+          streetAndNumber: 'Schillerstraße 45',
+          zipCode: 4103,
+          image:
+            'https://raw.githubusercontent.com/fharten/happy2help_frontend/refs/heads/main/public/images/h2h_logo_mint.png',
+          city: 'Leipzig',
+          state: 'Sachsen',
+          principal: 'Martin Keller',
+          loginEmail: 'info@zukunftsbildung.de',
+          password: hashedPassword,
+          phone: '0341 7824567',
+          isActivated: true,
+          isDisabled: false,
+          categoryName: 'Bildung',
+        },
+        {
+          name: 'Grünes Leben Verein',
+          isNonProfit: true,
+          streetAndNumber: 'Lindenweg 12',
+          zipCode: 79098,
+          image:
+            'https://raw.githubusercontent.com/fharten/happy2help_frontend/refs/heads/main/public/images/h2h_logo_mint.png',
+          city: 'Freiburg im Breisgau',
+          state: 'Baden-Württemberg',
+          principal: 'Sabine Vogt',
+          loginEmail: 'info@gruenesleben.de',
+          password: hashedPassword,
+          phone: '0761 323445',
+          isActivated: true,
+          isDisabled: false,
+          categoryName: 'Umwelt',
+        },
+        {
+          name: 'Kultur & Kunstforum e.V.',
+          isNonProfit: true,
+          streetAndNumber: 'Goethestraße 89',
+          zipCode: 99423,
+          image:
+            'https://raw.githubusercontent.com/fharten/happy2help_frontend/refs/heads/main/public/images/h2h_logo_mint.png',
+          city: 'Weimar',
+          state: 'Thüringen',
+          principal: 'Thomas Richter',
+          loginEmail: 'info@kulturkunstforum.de',
+          password: hashedPassword,
+          phone: '03643 912345',
+          isActivated: true,
+          isDisabled: false,
+          categoryName: 'Kunst & Kultur',
+        },
+        {
+          name: 'Sportfreunde Rhein-Main e.V.',
+          isNonProfit: true,
+          streetAndNumber: 'Mainufer 7',
+          zipCode: 55116,
+          image:
+            'https://raw.githubusercontent.com/fharten/happy2help_frontend/refs/heads/main/public/images/h2h_logo_mint.png',
+          city: 'Mainz',
+          state: 'Rheinland-Pfalz',
+          principal: 'Andrea Becker',
+          loginEmail: 'info@sportfreunde-rm.de',
+          password: hashedPassword,
+          phone: '06131 442278',
+          isActivated: true,
+          isDisabled: false,
+          categoryName: 'Sport',
+        },
+        {
+          name: 'DigitalBrücke e.V.',
+          isNonProfit: true,
+          streetAndNumber: 'Innovationsstraße 3',
+          zipCode: 44135,
+          image:
+            'https://raw.githubusercontent.com/fharten/happy2help_frontend/refs/heads/main/public/images/h2h_logo_mint.png',
+          city: 'Dortmund',
+          state: 'Nordrhein-Westfalen',
+          principal: 'Felix Mertens',
+          loginEmail: 'info@digitalbruecke.de',
+          password: hashedPassword,
+          phone: '0231 567890',
+          isActivated: true,
+          isDisabled: false,
+          categoryName: 'Technologie',
+        },
+      ];
+
+      const ngos = [];
+      for (const ngoData of ngosData) {
+        const { categoryName, ...ngoWithoutCategory } = ngoData;
+        const ngo = ngoRepository.create(ngoWithoutCategory);
+        const category = findCategoryByName(categoryName);
+        if (category) {
+          ngo.categories = [category];
+        }
+        const savedNgo = await ngoRepository.save(ngo);
+        ngos.push(savedNgo);
       }
 
-      // 10 Projects
-      const projectsData = Array.from({ length: 10 }).map((_, i) => ({
-        name: `Project ${i + 1}`,
-        description: `Description for project ${i + 1}. This is a detailed description that explains what this project is about and what volunteers will be doing. It contains at least 50 characters to meet validation requirements.`,
-        images: [
-          'http://localhost:3333/uploads/projects/71bb6806-2568-4734-9022-9509adb0ec27.png',
-          'http://localhost:3333/uploads/projects/18055f58-7241-43f7-9469-80592cceb096.png',
-          'http://localhost:3333/uploads/projects/860032a2-1d09-496d-892c-63a8b4364fe3.png',
-        ],
-        categories: [categories[i % 10]],
-        ngoId: ngos[i % 10].id,
-        ngo: ngos[i % 10],
-        city: `City${i + 1}`,
-        zipCode: 10000 + i,
-        state: `State${i + 1}`,
-        principal: `Principal ${i + 1}`,
-        compensation: `${100 * (i + 1)}€`,
-        isActive: i % 2 === 0,
-        skills: [skills[i % 10], skills[(i + 1) % 10]],
-        startingAt: new Date(),
-        endingAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
-      }));
-      const projects = await projectRepository.save(
-        projectsData.map(p => projectRepository.create(p))
-      );
+      // Projects with German data - 15 projects, 3 per NGO
+      const projectsDataRaw = [
+        {
+          name: 'Lernwerkstatt 2030',
+          description:
+            'Dieses Projekt vermittelt Jugendlichen praxisnah digitale Kompetenzen und bereitet sie umfassend auf die Anforderungen einer modernen Arbeitswelt vor.',
+          categoryName: 'Bildung',
+          city: 'Berlin',
+          zipCode: 10115,
+          state: 'Berlin',
+          principal: 'Lisa Sommer',
+          skillNames: ['Web Development', 'Projekt Management'],
+          ngoIndex: 0,
+        },
+        {
+          name: 'Gesund im Alter',
+          description:
+            'Ein umfassendes Präventionsprogramm, das Senioren mit Kursen, Beratung und Bewegungsangeboten unterstützt, um ihre Lebensqualität langfristig zu erhalten und zu verbessern.',
+          categoryName: 'Gesundheit',
+          city: 'München',
+          zipCode: 80331,
+          state: 'Bayern',
+          principal: 'Stefan Kraus',
+          skillNames: ['Marketing', 'Fundraising'],
+          ngoIndex: 0,
+        },
+        {
+          name: 'Saubere Flüsse',
+          description:
+            'Ehrenamtliche Helfer reinigen regelmäßig Flussufer und informieren dabei über Umweltschutz, Recycling sowie den nachhaltigen Umgang mit Naturressourcen.',
+          categoryName: 'Umwelt',
+          city: 'Köln',
+          zipCode: 50667,
+          state: 'Nordrhein-Westfalen',
+          principal: 'Julia König',
+          skillNames: ['Eventplanung', 'Social Media'],
+          ngoIndex: 0,
+        },
+        {
+          name: 'Nachbarschaftshilfe Plus',
+          description:
+            'Das Projekt bietet praktische Unterstützung für hilfsbedürftige Menschen im Alltag, von Einkaufshilfe bis Begleitung, und fördert so den Zusammenhalt in der Nachbarschaft.',
+          categoryName: 'Sozialarbeit',
+          city: 'Hamburg',
+          zipCode: 20095,
+          state: 'Hamburg',
+          principal: 'Markus Albrecht',
+          skillNames: ['Projekt Management', 'Unterrichten'],
+          ngoIndex: 1,
+        },
+        {
+          name: 'Kunst für alle',
+          description:
+            'In kreativen Workshops können Kinder und Jugendliche ihre künstlerischen Fähigkeiten entdecken, eigene Projekte entwickeln und ihre Arbeiten in Ausstellungen präsentieren.',
+          categoryName: 'Kunst & Kultur',
+          city: 'Dresden',
+          zipCode: 1067,
+          state: 'Sachsen',
+          principal: 'Heike Müller',
+          skillNames: ['Grafik Design', 'Eventplanung'],
+          ngoIndex: 1,
+        },
+        {
+          name: 'Jugend bewegt',
+          description:
+            'Sportangebote und Freizeitaktivitäten fördern körperliche Fitness, Teamgeist und Selbstbewusstsein bei benachteiligten Jugendlichen und bieten eine sinnvolle Freizeitgestaltung.',
+          categoryName: 'Sport',
+          city: 'Frankfurt am Main',
+          zipCode: 60311,
+          state: 'Hessen',
+          principal: 'Tobias Schmitt',
+          skillNames: ['Marketing', 'Projekt Management'],
+          ngoIndex: 1,
+        },
+        {
+          name: 'Tech4Future',
+          description:
+            'Junge Erwachsene erhalten praxisnahe Programmierkurse, die ihnen nicht nur technische Grundlagen vermitteln, sondern auch berufliche Chancen im IT-Bereich eröffnen.',
+          categoryName: 'Technologie',
+          city: 'Stuttgart',
+          zipCode: 70173,
+          state: 'Baden-Württemberg',
+          principal: 'Nadine Fischer',
+          skillNames: ['Web Development', 'Unterrichten'],
+          ngoIndex: 2,
+        },
+        {
+          name: 'Gemeinsam Stark',
+          description:
+            'Dieses Projekt fördert Begegnung, Austausch und gegenseitige Hilfe im Stadtviertel durch Veranstaltungen, gemeinsame Aktionen und soziale Unterstützungsangebote.',
+          categoryName: 'Gemeinschaft',
+          city: 'Bremen',
+          zipCode: 28195,
+          state: 'Bremen',
+          principal: 'Peter Wagner',
+          skillNames: ['Social Media', 'Fundraising'],
+          ngoIndex: 2,
+        },
+        {
+          name: 'Tierfreunde Projekt',
+          description:
+            'Ehrenamtliche unterstützen Tierheime aktiv bei der Versorgung von Tieren, organisieren Spendenaktionen und schaffen Aufmerksamkeit für verantwortungsvolle Tierhaltung.',
+          categoryName: 'Tierschutz',
+          city: 'Hannover',
+          zipCode: 30159,
+          state: 'Niedersachsen',
+          principal: 'Claudia Lehmann',
+          skillNames: ['Eventplanung', 'Fotografie'],
+          ngoIndex: 2,
+        },
+        {
+          name: 'Rechte für alle',
+          description:
+            'Durch Kampagnen, Informationsmaterial und Veranstaltungen werden Menschenrechte bekannter gemacht und gezielt gesellschaftliche Debatten zu aktuellen Themen angeregt.',
+          categoryName: 'Menschenrechte',
+          city: 'Düsseldorf',
+          zipCode: 40213,
+          state: 'Nordrhein-Westfalen',
+          principal: 'Michael Neumann',
+          skillNames: ['Übersetzung', 'Marketing'],
+          ngoIndex: 3,
+        },
+        {
+          name: 'Fit & Aktiv',
+          description:
+            'Spielerische Bewegungsprogramme für Kinder vermitteln Freude an Sport, stärken Motorik und Gesundheit und fördern den Zusammenhalt durch Teamspiele und kreative Übungen.',
+          categoryName: 'Gesundheit',
+          city: 'Nürnberg',
+          zipCode: 90402,
+          state: 'Bayern',
+          principal: 'Katharina Brandt',
+          skillNames: ['Projekt Management', 'Social Media'],
+          ngoIndex: 3,
+        },
+        {
+          name: 'Coding4Kids',
+          description:
+            'Kinder lernen auf spielerische Weise die Grundlagen der Programmierung und entwickeln kleine digitale Projekte, die Kreativität und logisches Denken verbinden.',
+          categoryName: 'Bildung',
+          city: 'Essen',
+          zipCode: 45127,
+          state: 'Nordrhein-Westfalen',
+          principal: 'Daniel Weber',
+          skillNames: ['Web Development', 'Eventplanung'],
+          ngoIndex: 3,
+        },
+        {
+          name: 'Kunst im Park',
+          description:
+            'Lokale Künstlerinnen und Künstler stellen ihre Werke in öffentlichen Parks aus, wodurch Kunst für alle zugänglich wird und ein kultureller Austausch entsteht.',
+          categoryName: 'Kunst & Kultur',
+          city: 'Potsdam',
+          zipCode: 14467,
+          state: 'Brandenburg',
+          principal: 'Anja Keller',
+          skillNames: ['Grafik Design', 'Fundraising'],
+          ngoIndex: 4,
+        },
+        {
+          name: 'Green Energy Now',
+          description:
+            'Bildungsinitiativen klären über erneuerbare Energien auf, fördern nachhaltige Projekte und geben praktische Tipps für klimafreundlichen Alltag und bewussten Konsum.',
+          categoryName: 'Umwelt',
+          city: 'Kiel',
+          zipCode: 24103,
+          state: 'Schleswig-Holstein',
+          principal: 'Florian Hartmann',
+          skillNames: ['Unterrichten', 'Marketing'],
+          ngoIndex: 4,
+        },
+        {
+          name: 'Voices of Freedom',
+          description:
+            'In Workshops setzen sich Teilnehmende mit Demokratie und Bürgerrechten auseinander, entwickeln eigene Ideen und diskutieren aktiv gesellschaftliche Fragestellungen.',
+          categoryName: 'Menschenrechte',
+          city: 'Bonn',
+          zipCode: 53111,
+          state: 'Nordrhein-Westfalen',
+          principal: 'Jana Hoffmann',
+          skillNames: ['Übersetzung', 'Projekt Management'],
+          ngoIndex: 4,
+        },
+      ];
 
-      // Assign participants to projects
-      for (let i = 0; i < projects.length; i++) {
-        const project = projects[i];
-        project.participants = [users[i]];
-        await projectRepository.save(project);
+      const projects = [];
+      for (const projectData of projectsDataRaw) {
+        const { categoryName, skillNames, ngoIndex, ...projectWithoutRelations } = projectData;
+        const project = projectRepository.create({
+          ...projectWithoutRelations,
+          ngoId: ngos[ngoIndex].id,
+          ngo: ngos[ngoIndex],
+          categories: [findCategoryByName(categoryName)].filter(Boolean) as Category[],
+          skills: findSkillsByNames(skillNames),
+          compensation: '100€',
+          isActive: true,
+          participants: [],
+          images: [
+            'https://raw.githubusercontent.com/fharten/happy2help_frontend/refs/heads/main/public/images/h2h_logo_mint.png',
+          ],
+          startingAt: new Date(),
+          endingAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
+        });
+        const savedProject = await projectRepository.save(project);
+        projects.push(savedProject);
       }
 
-      // 10 Applications with Skills
-      const applicationsData = projects.map((project, i) => {
-        const applicationData = {
-          projectId: project.id,
-          userId: users[i].id,
-          ngoId: ngos[i].id,
-          status:
-            i % 3 === 0
+      // Create applications - each user applies to 2 projects
+      const savedApplications: Application[] = [];
+
+      for (let userIndex = 0; userIndex < users.length; userIndex++) {
+        const user = users[userIndex];
+
+        // Each user applies to 2 projects
+        const firstProjectIndex = (userIndex * 2) % projects.length;
+        const secondProjectIndex = (userIndex * 2 + 1) % projects.length;
+
+        const projectsToApply = [projects[firstProjectIndex], projects[secondProjectIndex]];
+
+        for (let appIndex = 0; appIndex < projectsToApply.length; appIndex++) {
+          const project = projectsToApply[appIndex];
+
+          const status =
+            (userIndex + appIndex) % 3 === 0
               ? ApplicationStatus.ACCEPTED
-              : i % 3 === 1
+              : (userIndex + appIndex) % 3 === 1
                 ? ApplicationStatus.PENDING
-                : ApplicationStatus.REJECTED,
-          message: `Application message for ${project.name}`,
-        };
+                : ApplicationStatus.REJECTED;
 
-        const projectSkills = project.skills || [];
-        const numSkillsToAdd = Math.min(
-          projectSkills.length,
-          Math.max(1, Math.floor(Math.random() * 3) + 1)
+          const applicationEntity = applicationRepository.create({
+            projectId: project.id,
+            userId: user.id,
+            ngoId: project.ngoId,
+            status: status,
+            message: `Bewerbung für ${project.name}`,
+            skills: project.skills.slice(0, Math.min(2, project.skills.length)),
+          });
+
+          const savedApplication = await applicationRepository.save(applicationEntity);
+          savedApplications.push(savedApplication);
+        }
+      }
+
+      // Generate notifications
+      const exampleUser = users[1]; // Alexander Braun
+      const exampleNgo = ngos[0]; // ZukunftsBildung e.V.
+
+      // Load applications with relations
+      const applicationsWithRelations: Array<
+        Application & { user?: User; project?: Project; ngo?: Ngo }
+      > = [];
+      for (const applicationItem of savedApplications) {
+        const fullApplication = await applicationRepository.findOne({
+          where: { id: applicationItem.id },
+          relations: ['user', 'project', 'ngo'],
+        });
+        if (fullApplication) applicationsWithRelations.push(fullApplication);
+      }
+
+      // NGO Notifications: USER_APPLIED
+      const ngoNotificationsToCreate: Notification[] = [];
+      for (const applicationItem of applicationsWithRelations) {
+        if (
+          applicationItem.ngoId === exampleNgo.id &&
+          applicationItem.user &&
+          applicationItem.project
+        ) {
+          const notificationForNgo = notificationRepository.create({
+            ngoId: exampleNgo.id,
+            name: `${applicationItem.user.firstName} ${applicationItem.user.lastName} hat sich beworben`,
+            description: `${applicationItem.user.firstName} ${applicationItem.user.lastName} hat sich für „${applicationItem.project.name}" beworben.`,
+            read: false,
+          });
+          ngoNotificationsToCreate.push(notificationForNgo);
+        }
+      }
+
+      if (ngoNotificationsToCreate.length < 2) {
+        const projectForExampleNgo =
+          projects.find(projectItem => projectItem.ngoId === exampleNgo.id) || projects[0];
+        const extraUserA = users[2];
+        const extraUserB = users[3];
+        if (projectForExampleNgo && extraUserA) {
+          ngoNotificationsToCreate.push(
+            notificationRepository.create({
+              ngoId: exampleNgo.id,
+              name: `${extraUserA.firstName} ${extraUserA.lastName} hat sich beworben`,
+              description: `${extraUserA.firstName} ${extraUserA.lastName} hat sich für „${projectForExampleNgo.name}" beworben.`,
+              read: false,
+            })
+          );
+        }
+        if (projectForExampleNgo && extraUserB) {
+          ngoNotificationsToCreate.push(
+            notificationRepository.create({
+              ngoId: exampleNgo.id,
+              name: `${extraUserB.firstName} ${extraUserB.lastName} hat sich beworben`,
+              description: `${extraUserB.firstName} ${extraUserB.lastName} hat sich für „${projectForExampleNgo.name}" beworben.`,
+              read: false,
+            })
+          );
+        }
+      }
+
+      await notificationRepository.save(ngoNotificationsToCreate);
+
+      // User Notifications: NGO_ACCEPTED / NGO_REJECTED
+      const userNotificationsToCreate: Notification[] = [];
+      for (const applicationItem of applicationsWithRelations) {
+        if (applicationItem.userId === exampleUser.id && applicationItem.project) {
+          if (applicationItem.status === ApplicationStatus.ACCEPTED) {
+            userNotificationsToCreate.push(
+              notificationRepository.create({
+                userId: exampleUser.id,
+                name: 'Bewerbung angenommen',
+                description: `Deine Bewerbung für „${applicationItem.project.name}" wurde akzeptiert.`,
+                read: false,
+              })
+            );
+          } else if (applicationItem.status === ApplicationStatus.REJECTED) {
+            userNotificationsToCreate.push(
+              notificationRepository.create({
+                userId: exampleUser.id,
+                name: 'Bewerbung abgelehnt',
+                description: `Deine Bewerbung für „${applicationItem.project.name}" wurde abgelehnt.`,
+                read: false,
+              })
+            );
+          }
+        }
+      }
+
+      if (userNotificationsToCreate.length < 2) {
+        const fallbackProject = projects[1] || projects[0];
+        userNotificationsToCreate.push(
+          notificationRepository.create({
+            userId: exampleUser.id,
+            name: 'Bewerbung angenommen',
+            description: `Deine Bewerbung für „${fallbackProject.name}" wurde akzeptiert.`,
+            read: false,
+          })
         );
-        const applicationSkills = projectSkills.slice(0, numSkillsToAdd);
+        userNotificationsToCreate.push(
+          notificationRepository.create({
+            userId: exampleUser.id,
+            name: 'Bewerbung abgelehnt',
+            description: `Deine Bewerbung für „${fallbackProject.name}" wurde abgelehnt.`,
+            read: false,
+          })
+        );
+      }
 
-        return {
-          ...applicationData,
-          skills: applicationSkills,
-        };
-      });
+      await notificationRepository.save(userNotificationsToCreate);
 
-      // Save applications with their skills
-      for (const appData of applicationsData) {
-        const { skills: appSkills, ...applicationWithoutSkills } = appData;
-        const application = applicationRepository.create(applicationWithoutSkills);
-        application.skills = appSkills;
-        await applicationRepository.save(application);
+      // Withdraw Notification
+      const projectForWithdraw = projects.find(projectItem => projectItem.ngoId === exampleNgo.id);
+      if (projectForWithdraw) {
+        const withdrawNotification = notificationRepository.create({
+          ngoId: exampleNgo.id,
+          name: 'Bewerbung zurückgezogen',
+          description: 'Der Nutzer hat seine Bewerbung zurückgezogen.',
+          read: false,
+        });
+        await notificationRepository.save(withdrawNotification);
       }
 
       console.log('Seeding completed successfully!');
@@ -199,17 +661,22 @@ const seedData = async () => {
       console.log(`✅ Created ${categories.length} categories`);
       console.log(`✅ Created ${users.length} users with skills`);
       console.log(`✅ Created ${ngos.length} NGOs with categories`);
-      console.log(`✅ Created ${projects.length} projects`);
-      console.log(`✅ Created ${applicationsData.length} applications with skills`);
+      console.log(`✅ Created ${projects.length} projects (3 per NGO)`);
+      console.log(`✅ Created ${savedApplications.length} applications (2 per user)`);
+      console.log(`✅ Created ${ngoNotificationsToCreate.length} NGO notifications (USER_APPLIED)`);
+      console.log(
+        `✅ Created ${userNotificationsToCreate.length} user notifications (ACCEPTED/REJECTED)`
+      );
+      console.log(`✅ Created 1 NGO withdraw notification`);
 
-      // Log some sample data to verify relationships
+      // Sample checks
       const sampleUser = await userRepository.findOne({
-        where: { id: users[0].id },
+        where: { id: users[1].id },
         relations: ['skills'],
       });
       console.log(
         `👤 Sample user ${sampleUser?.firstName} has ${sampleUser?.skills?.length} skills:`,
-        sampleUser?.skills?.map(s => s.name)
+        sampleUser?.skills?.map(skillItem => skillItem.name)
       );
 
       const sampleNgo = await ngoRepository.findOne({
@@ -218,8 +685,14 @@ const seedData = async () => {
       });
       console.log(
         `🏢 Sample NGO ${sampleNgo?.name} has ${sampleNgo?.categories?.length} categories:`,
-        sampleNgo?.categories?.map(c => c.name)
+        sampleNgo?.categories?.map(categoryItem => categoryItem.name)
       );
+
+      // Verify projects per NGO
+      for (const ngo of ngos) {
+        const ngoProjects = projects.filter(p => p.ngoId === ngo.id);
+        console.log(`🏢 ${ngo.name} has ${ngoProjects.length} projects`);
+      }
     });
   } catch (error) {
     console.error('Error seeding database:', error);

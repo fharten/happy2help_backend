@@ -2,7 +2,7 @@ name: Deploy to Uberspace
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -10,63 +10,63 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Build application
-      run: npm run build
+      - name: Build application
+        run: npm run build
 
-    - name: Deploy to Uberspace
-      uses: burnett01/rsync-deployments@6.0.0
-      with:
-        switches: -avzr --delete --exclude='.git' --exclude='.github' --exclude='node_modules' --exclude='.env*'
-        path: ./
-        remote_path: /home/${{ vars.SSH_USERNAME }}/happy2help/backend/
-        remote_host: ${{ vars.SSH_HOST }}
-        remote_user: ${{ vars.SSH_USERNAME }}
-        remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
-        remote_key_pass: ${{ secrets.SSH_PRIVATE_KEY_PASS }}
+      - name: Deploy to Uberspace
+        uses: burnett01/rsync-deployments@6.0.0
+        with:
+          switches: -avzr --delete --exclude='.git' --exclude='.github' --exclude='node_modules' --exclude='.env*'
+          path: ./
+          remote_path: /home/${{ vars.SSH_USERNAME }}/happy2help/backend/
+          remote_host: ${{ vars.SSH_HOST }}
+          remote_user: ${{ vars.SSH_USERNAME }}
+          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          remote_key_pass: ${{ secrets.SSH_PRIVATE_KEY_PASS }}
 
-    - name: Install dependencies on server
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ vars.SSH_HOST }}
-        username: ${{ vars.SSH_USERNAME }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        passphrase: ${{ secrets.SSH_PRIVATE_KEY_PASS }}
-        script: |
-          cd ~/happy2help/backend
-          npm ci --only=production
+      - name: Install dependencies on server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ vars.SSH_HOST }}
+          username: ${{ vars.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PRIVATE_KEY_PASS }}
+          script: |
+            cd ~/happy2help/backend
+            npm ci --only=production
 
-    - name: Initialize database if needed
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ vars.SSH_HOST }}
-        username: ${{ vars.SSH_USERNAME }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        passphrase: ${{ secrets.SSH_PRIVATE_KEY_PASS }}
-        script: |
-          cd ~/happy2help/backend
-          mkdir -p ~/data
-          if [ ! -f ~/data/happy2help.sqlite ]; then
-            NODE_ENV=production npm run init-db
-          fi
+      - name: Initialize database if needed
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ vars.SSH_HOST }}
+          username: ${{ vars.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PRIVATE_KEY_PASS }}
+          script: |
+            cd ~/happy2help/backend
+            mkdir -p ~/data
+            if [ ! -f ~/data/happy2help.sqlite ]; then
+              NODE_ENV=production npm run init-db
+            fi
 
-    - name: Restart service
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ vars.SSH_HOST }}
-        username: ${{ vars.SSH_USERNAME }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        passphrase: ${{ secrets.SSH_PRIVATE_KEY_PASS }}
-        script: |
-          supervisorctl restart happy2help-backend
+      - name: Restart service
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ vars.SSH_HOST }}
+          username: ${{ vars.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PRIVATE_KEY_PASS }}
+          script: |
+            supervisorctl restart happy2help-backend
