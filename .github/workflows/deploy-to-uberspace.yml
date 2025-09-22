@@ -28,7 +28,7 @@ jobs:
       - name: Deploy to Uberspace
         uses: burnett01/rsync-deployments@6.0.0
         with:
-          switches: -avzr --delete --exclude='.git' --exclude='.github' --exclude='node_modules' --exclude='.env*'
+          switches: -avzr --delete --exclude='.git' --exclude='.github' --exclude='node_modules' --exclude='.env*' --exclude='src' --exclude='tsconfig.json'
           path: ./
           remote_path: /home/${{ vars.SSH_USERNAME }}/happy2help/backend/
           remote_host: ${{ vars.SSH_HOST }}
@@ -36,7 +36,7 @@ jobs:
           remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
           remote_key_pass: ${{ secrets.SSH_PRIVATE_KEY_PASS }}
 
-      - name: Install dependencies on server
+      - name: Install production dependencies on server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ vars.SSH_HOST }}
@@ -45,7 +45,7 @@ jobs:
           passphrase: ${{ secrets.SSH_PRIVATE_KEY_PASS }}
           script: |
             cd ~/happy2help/backend
-            npm ci --only=production
+            npm ci --omit=dev
 
       - name: Initialize database if needed
         uses: appleboy/ssh-action@v1.0.3
