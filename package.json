@@ -9,8 +9,7 @@
     "init-db": "ts-node src/init-db.ts",
     "seed": "ts-node src/seed.ts",
     "build": "tsc",
-    "start": "node dist/app.js",
-    "postinstall": "npm run build"
+    "start": "node dist/app.js"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
