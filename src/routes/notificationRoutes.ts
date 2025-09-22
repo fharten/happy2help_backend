@@ -11,18 +11,18 @@ router.post('/', notificationController.createNotification);
 // GET all NOTIFICATIONs per user | /notifications/users/:userId
 // PROTECTED: ONLY OWNER
 router.get(
-  '/users/:userId',
+  '/users/:id',
   authenticateToken,
-  requireOwnerOrRole([]),
+  requireOwnerOrRole([], 'user'),
   notificationController.getAllUserNotificationsByUserId
 );
 
 // GET all NOTIFICATIONs per NGO | /notifications/ngos/:ngoId
 // PROTECTED: ONLY OWNER
 router.get(
-  '/ngos/:ngoId',
+  '/ngos/:id',
   authenticateToken,
-  requireOwnerOrRole([]),
+  requireOwnerOrRole([], 'ngo'),
   notificationController.getAllNgoNotificationsByNgoId
 );
 
