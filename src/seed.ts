@@ -210,7 +210,7 @@ const seedData = async () => {
           categoryName: 'Bildung',
         },
         {
-          name: 'Grünes Leben Verein',
+          name: 'Verein Grünes Leben',
           isNonProfit: true,
           streetAndNumber: 'Lindenweg 12',
           zipCode: 79098,
