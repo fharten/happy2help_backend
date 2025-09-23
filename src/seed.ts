@@ -44,16 +44,16 @@ const seedData = async () => {
 
       // Skills (German)
       const skillsData = [
-        { name: 'Web Development', description: 'Frontend and backend development' },
-        { name: 'Grafik Design', description: 'Visual and branding design' },
-        { name: 'Projekt Management', description: 'Managing teams and projects' },
-        { name: 'Marketing', description: 'Digital and traditional marketing' },
-        { name: 'Unterrichten', description: 'Educational skills' },
-        { name: 'Social Media', description: 'Social media management' },
-        { name: 'Fotografie', description: 'Photography and editing' },
-        { name: 'Übersetzung', description: 'Language translation' },
-        { name: 'Eventplanung', description: 'Organizing events' },
-        { name: 'Fundraising', description: 'Raising funds for causes' },
+        { name: 'Web-Development', description: 'Frontend- und Backend-Development' },
+        { name: 'Grafikdesign', description: 'Visual- und Branddesign' },
+        { name: 'Projektmanagement', description: 'Teams und Projekte verwalten' },
+        { name: 'Marketing', description: 'Digitales und analoges Marketing' },
+        { name: 'Unterrichten', description: 'Pädagogisches Unterrichten' },
+        { name: 'Social-Media', description: 'Social-Media-Management' },
+        { name: 'Fotografie', description: 'Fotografie und Fotobearbeitung' },
+        { name: 'Übersetzung', description: 'Übertragen von Texten in andere Sprachen' },
+        { name: 'Eventplanung', description: 'Veranstaltungen organisieren' },
+        { name: 'Fundraising', description: 'Spenden sammeln für gute Zwecke' },
       ];
       const skills = await skillRepository.save(
         skillsData.map(skillItem => skillRepository.create(skillItem))
@@ -97,7 +97,7 @@ const seedData = async () => {
           state: 'Berlin',
           isActivated: true,
           isDisabled: false,
-          skillNames: ['Web Development', 'Projekt Management'],
+          skillNames: ['Web-Development', 'Projektmanagement'],
         },
         {
           firstName: 'Alexander',
@@ -112,7 +112,7 @@ const seedData = async () => {
           state: 'Berlin',
           isActivated: true,
           isDisabled: false,
-          skillNames: ['Web Development', 'Projekt Management', 'Marketing', 'Fundraising'],
+          skillNames: ['Web-Development', 'Projektmanagement', 'Marketing', 'Fundraising'],
         },
         {
           firstName: 'Laura',
@@ -127,7 +127,7 @@ const seedData = async () => {
           state: 'Bayern',
           isActivated: true,
           isDisabled: false,
-          skillNames: ['Grafik Design', 'Eventplanung', 'Social Media', 'Übersetzung'],
+          skillNames: ['Grafikdesign', 'Eventplanung', 'Social-Media', 'Übersetzung'],
         },
         {
           firstName: 'Jonas',
@@ -142,7 +142,7 @@ const seedData = async () => {
           state: 'Nordrhein-Westfalen',
           isActivated: true,
           isDisabled: false,
-          skillNames: ['Fotografie', 'Marketing', 'Unterrichten', 'Projekt Management'],
+          skillNames: ['Fotografie', 'Marketing', 'Unterrichten', 'Projektmanagement'],
         },
         {
           firstName: 'Sarah',
@@ -157,7 +157,7 @@ const seedData = async () => {
           state: 'Hamburg',
           isActivated: true,
           isDisabled: false,
-          skillNames: ['Web Development', 'Grafik Design', 'Social Media', 'Fundraising'],
+          skillNames: ['Web-Development', 'Grafikdesign', 'Social-Media', 'Fundraising'],
         },
         {
           firstName: 'David',
@@ -172,7 +172,7 @@ const seedData = async () => {
           state: 'Sachsen',
           isActivated: true,
           isDisabled: false,
-          skillNames: ['Unterrichten', 'Eventplanung', 'Projekt Management', 'Übersetzung'],
+          skillNames: ['Unterrichten', 'Eventplanung', 'Projektmanagement', 'Übersetzung'],
         },
       ];
 
@@ -196,7 +196,7 @@ const seedData = async () => {
           name: 'ZukunftsBildung e.V.',
           isNonProfit: true,
           streetAndNumber: 'Schillerstraße 45',
-          zipCode: 4103,
+          zipCode: 14103,
           image:
             'https://raw.githubusercontent.com/fharten/happy2help_frontend/refs/heads/main/public/images/h2h_logo_mint.png',
           city: 'Leipzig',
@@ -302,7 +302,7 @@ const seedData = async () => {
           zipCode: 10115,
           state: 'Berlin',
           principal: 'Lisa Sommer',
-          skillNames: ['Web Development', 'Projekt Management'],
+          skillNames: ['Web-Development', 'Projektmanagement'],
           ngoIndex: 0,
         },
         {
@@ -326,7 +326,7 @@ const seedData = async () => {
           zipCode: 50667,
           state: 'Nordrhein-Westfalen',
           principal: 'Julia König',
-          skillNames: ['Eventplanung', 'Social Media'],
+          skillNames: ['Eventplanung', 'Social-Media'],
           ngoIndex: 0,
         },
         {
@@ -338,7 +338,7 @@ const seedData = async () => {
           zipCode: 20095,
           state: 'Hamburg',
           principal: 'Markus Albrecht',
-          skillNames: ['Projekt Management', 'Unterrichten'],
+          skillNames: ['Projektmanagement', 'Unterrichten'],
           ngoIndex: 1,
         },
         {
@@ -347,10 +347,10 @@ const seedData = async () => {
             'In kreativen Workshops können Kinder und Jugendliche ihre künstlerischen Fähigkeiten entdecken, eigene Projekte entwickeln und ihre Arbeiten in Ausstellungen präsentieren.',
           categoryName: 'Kunst & Kultur',
           city: 'Dresden',
-          zipCode: 1067,
+          zipCode: 11067,
           state: 'Sachsen',
           principal: 'Heike Müller',
-          skillNames: ['Grafik Design', 'Eventplanung'],
+          skillNames: ['Grafikdesign', 'Eventplanung'],
           ngoIndex: 1,
         },
         {
@@ -362,7 +362,7 @@ const seedData = async () => {
           zipCode: 60311,
           state: 'Hessen',
           principal: 'Tobias Schmitt',
-          skillNames: ['Marketing', 'Projekt Management'],
+          skillNames: ['Marketing', 'Projektmanagement'],
           ngoIndex: 1,
         },
         {
@@ -374,7 +374,7 @@ const seedData = async () => {
           zipCode: 70173,
           state: 'Baden-Württemberg',
           principal: 'Nadine Fischer',
-          skillNames: ['Web Development', 'Unterrichten'],
+          skillNames: ['Web-Development', 'Unterrichten'],
           ngoIndex: 2,
         },
         {
@@ -386,7 +386,7 @@ const seedData = async () => {
           zipCode: 28195,
           state: 'Bremen',
           principal: 'Peter Wagner',
-          skillNames: ['Social Media', 'Fundraising'],
+          skillNames: ['Social-Media', 'Fundraising'],
           ngoIndex: 2,
         },
         {
@@ -422,7 +422,7 @@ const seedData = async () => {
           zipCode: 90402,
           state: 'Bayern',
           principal: 'Katharina Brandt',
-          skillNames: ['Projekt Management', 'Social Media'],
+          skillNames: ['Projektmanagement', 'Social-Media'],
           ngoIndex: 3,
         },
         {
@@ -434,7 +434,7 @@ const seedData = async () => {
           zipCode: 45127,
           state: 'Nordrhein-Westfalen',
           principal: 'Daniel Weber',
-          skillNames: ['Web Development', 'Eventplanung'],
+          skillNames: ['Web-Development', 'Eventplanung'],
           ngoIndex: 3,
         },
         {
@@ -446,7 +446,7 @@ const seedData = async () => {
           zipCode: 14467,
           state: 'Brandenburg',
           principal: 'Anja Keller',
-          skillNames: ['Grafik Design', 'Fundraising'],
+          skillNames: ['Grafikdesign', 'Fundraising'],
           ngoIndex: 4,
         },
         {
@@ -470,7 +470,7 @@ const seedData = async () => {
           zipCode: 53111,
           state: 'Nordrhein-Westfalen',
           principal: 'Jana Hoffmann',
-          skillNames: ['Übersetzung', 'Projekt Management'],
+          skillNames: ['Übersetzung', 'Projektmanagement'],
           ngoIndex: 4,
         },
       ];
