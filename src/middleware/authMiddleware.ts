@@ -289,6 +289,17 @@ export const requireOwnerByParam = (paramName: string, allowedRoles: string[] = 
 
     // CHECK IF USER ID matches the specified parameter
     const paramValue = req.params[paramName];
+
+    // DEBUG LOGGING
+    console.log('Auth check:', {
+      'req.user.id': req.user.id,
+      paramValue: paramValue,
+      paramName: paramName,
+      'are equal': req.user.id === paramValue,
+      'req.user.id type': typeof req.user.id,
+      'paramValue type': typeof paramValue,
+    });
+
     if (req.user.id === paramValue) {
       return next();
     }

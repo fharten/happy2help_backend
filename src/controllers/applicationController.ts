@@ -550,10 +550,13 @@ export class ApplicationController {
   checkUserApplication = async (req: Request, res: Response): Promise<void> => {
     try {
       const { userId, projectId } = req.params;
+      console.log('Checking application for:', { userId, projectId });
 
       const application = await this.applicationRepository.findOne({
         where: { userId, projectId },
       });
+
+      console.log('Found application:', application);
 
       res.status(200).json({
         success: true,
