@@ -1,6 +1,10 @@
 # Backend
 
-![Node.js](https://img.shields.io/badge/Node.s-Express-339933?logo=node.js&logoColor=white) ![Express](https://img.shields.io/badge/Express-5.1.0-000000?logo=express&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-3178C6?logo=typescript&logoColor=white) ![SQLite](https://img.shields.io/badge/SQLite-better--sqlite3-003B57?logo=sqlite&logoColor=white) ![TypeORM](https://img.shields.io/badge/TypeORM-0.3.26-E83524?logo=typeorm&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.s-Express-339933?logo=node.js&logoColor=white) ![Express](https://img.shields.io/badge/Express-5.1.0-000000?logo=express&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-3178C6?logo=typescript&logoColor=white) ![SQLite](https://img.shields.io/badge/SQLite-better--sqlite3-003B57?logo=sqlite&logoColor=white) ![TypeORM](https://img.shields.io/badge/TypeORM-0.3.26-E83524?logo=typeorm&logoColor=white) [![Deploy to Uberspace](https://github.com/fharten/happy2help_backend/actions/workflows/deploy-to-uberspace.yml/badge.svg)](https://github.com/fharten/happy2help_backend/actions/workflows/deploy-to-uberspace.yml)
+
+<div style="text-align: center;">
+  <img src="https://raw.githubusercontent.com/fharten/happy2help_frontend/refs/heads/main/public/images/deployed/homepage.png" width="600" alt='Happy2Help Frontpage'>
+</div>
 
 ## About
 
