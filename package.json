@@ -9,7 +9,14 @@
     "init-db": "ts-node src/init-db.ts",
     "seed": "ts-node src/seed.ts",
     "build": "tsc",
-    "start": "node dist/app.js"
+    "start": "node dist/app.js",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
@@ -21,6 +28,8 @@
     "eslint": "^9.34.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.0",
     "nodemon": "^3.1.10",
     "prettier": "^3.6.2",
     "ts-node": "^10.9.2",
