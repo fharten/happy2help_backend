@@ -16,8 +16,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
+
+      - name: Remove husky prepare script
+        run: |
+          npm pkg delete scripts.prepare
 
       - name: Install dependencies
         run: npm ci
