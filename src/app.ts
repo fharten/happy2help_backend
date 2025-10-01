@@ -39,6 +39,12 @@ const AppDataSource = new DataSource({
 const corsOptions = {
   origin: process.env.TRUSTED_ORIGINS ? process.env.TRUSTED_ORIGINS.split(',') : true,
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  exposedHeaders: ['Content-Type', 'Authorization'],
+  maxAge: 86400,
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
 };
 app.use(cors(corsOptions));
 app.use(express.json());
