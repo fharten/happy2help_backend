@@ -5,8 +5,12 @@ import { getImageUrl, deleteImageFile, getFilePathFromUrl } from '../middleware/
 import { Category } from '../models/categoryModel';
 
 export class NgoController {
-  public ngoRepository = AppDataSource.getRepository(Ngo);
-  public categoryRepository = AppDataSource.getRepository(Category);
+  private get ngoRepository() {
+    return AppDataSource.getRepository(Ngo);
+  }
+  private get categoryRepository() {
+    return AppDataSource.getRepository(Category);
+  }
 
   // GET ALL | GET /api/ngos
   getAllNgos = async (req: Request, res: Response): Promise<void> => {

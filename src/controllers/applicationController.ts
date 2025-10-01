@@ -8,10 +8,18 @@ import { notificationConnections } from '../services/notificationConnections';
 import { Notification } from '../models/notificationModel';
 
 export class ApplicationController {
-  public applicationRepository = AppDataSource.getRepository(Application);
-  public projectRepository = AppDataSource.getRepository(Project);
-  public userRepository = AppDataSource.getRepository(User);
-  public notificationRepository = AppDataSource.getRepository(Notification);
+  private get applicationRepository() {
+    return AppDataSource.getRepository(Application);
+  }
+  private get projectRepository() {
+    return AppDataSource.getRepository(Project);
+  }
+  private get userRepository() {
+    return AppDataSource.getRepository(User);
+  }
+  private get notificationRepository() {
+    return AppDataSource.getRepository(Notification);
+  }
 
   // GET ALL BY USER ID | GET /api/applications/user/:userId
   getAllApplicationsByUserId = async (req: Request, res: Response): Promise<void> => {

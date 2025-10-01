@@ -5,8 +5,12 @@ import { getImageUrl, deleteImageFile, getFilePathFromUrl } from '../middleware/
 import { Skill } from '../models/skillModel';
 
 export class UserController {
-  public userRepository = AppDataSource.getRepository(User);
-  public skillRepository = AppDataSource.getRepository(Skill);
+  private get userRepository() {
+    return AppDataSource.getRepository(User);
+  }
+  private get skillRepository() {
+    return AppDataSource.getRepository(Skill);
+  }
 
   // GET ALL USERS | GET /api/users
   getAllUsers = async (req: Request, res: Response): Promise<void> => {
