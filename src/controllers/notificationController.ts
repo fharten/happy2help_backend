@@ -21,9 +21,7 @@ export class NotificationController {
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
-        res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
-        res.setHeader('Access-Control-Allow-Credentials', 'true');
-        res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, Accept');
+        res.setHeader('X-Accel-Buffering', 'no');
 
         const removeConnection = notificationConnections.addUser(id, res);
         console.log(`[SSE] User ${id} connection added to registry`);
@@ -86,9 +84,7 @@ export class NotificationController {
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
-        res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
-        res.setHeader('Access-Control-Allow-Credentials', 'true');
-        res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, Accept');
+        res.setHeader('X-Accel-Buffering', 'no');
 
         const removeConnection = notificationConnections.addNgo(id, res);
 
