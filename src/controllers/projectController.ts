@@ -6,7 +6,9 @@ import { Skill } from '../models/skillModel';
 import { getImageUrl, deleteImageFile, getFilePathFromUrl } from '../middleware/uploadMiddleware';
 
 export class ProjectController {
-  public projectRepository = AppDataSource.getRepository(Project);
+  private get projectRepository() {
+    return AppDataSource.getRepository(Project);
+  }
 
   // GET ALL | GET /api/projects
   getAllProjects = async (req: Request, res: Response): Promise<void> => {

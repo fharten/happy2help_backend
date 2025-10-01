@@ -6,8 +6,12 @@ import { Project } from '../models/projectModel';
 import { ApplicationStatus } from '../types/applicationRole';
 
 export class CategoryController {
-  public categoryRepository = AppDataSource.getRepository(Category);
-  public projectRepository = AppDataSource.getRepository(Project);
+  private get categoryRepository() {
+    return AppDataSource.getRepository(Category);
+  }
+  private get projectRepository() {
+    return AppDataSource.getRepository(Project);
+  }
 
   // GET ALL CATEGORIES | GET /api/categories
   getAllCategories = async (req: Request, res: Response): Promise<void> => {

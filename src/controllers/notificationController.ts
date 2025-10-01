@@ -4,7 +4,9 @@ import { Notification } from '../models/notificationModel';
 import { notificationConnections } from '../services/notificationConnections';
 
 export class NotificationController {
-  public notificationRepository = AppDataSource.getRepository(Notification);
+  private get notificationRepository() {
+    return AppDataSource.getRepository(Notification);
+  }
 
   // GET ALL BY USER ID | GET /api/notifications/user/:userId
   // Optional SSE: streamt Events für diesen User

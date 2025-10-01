@@ -3,7 +3,9 @@ import { AppDataSource } from '../app';
 import { Skill } from '../models/skillModel';
 
 export class SkillController {
-  public skillRepository = AppDataSource.getRepository(Skill);
+  private get skillRepository() {
+    return AppDataSource.getRepository(Skill);
+  }
 
   // GET ALL | GET /api/skills
   getAllSkills = async (req: Request, res: Response): Promise<void> => {
