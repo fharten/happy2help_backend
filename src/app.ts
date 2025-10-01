@@ -40,7 +40,7 @@ const corsOptions = {
   origin: process.env.TRUSTED_ORIGINS ? process.env.TRUSTED_ORIGINS.split(',') : true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Cache-Control'],
   exposedHeaders: ['Content-Type', 'Authorization'],
   maxAge: 86400,
   preflightContinue: false,
